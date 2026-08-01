@@ -15,9 +15,8 @@ export const DEFAULT_PARAMS: AtemParams = {
 const MS_PER_DAY = 86_400_000;
 const AVG_DAYS_PER_MONTH = 30.4368;
 
-// Accelerating-model interpolation anchors: D_ai(t) goes 7mo @ 2019-01-01 -> 4mo @ asOf ("now").
+// Accelerating-model interpolation anchor: D_ai(t) goes 7mo @ 2019-01-01 -> params.dAiMonths @ asOf ("now").
 const ACCEL_D0 = 7;
-const ACCEL_D1 = 4;
 const ACCEL_EPOCH_START = Date.UTC(2019, 0, 1);
 
 export function elapsedDays(release: Date, asOf: Date): number {
@@ -48,15 +47,15 @@ export function yearsToHuman(years: number): string {
   return parts.join(" ");
 }
 
-function dAiAt(t: number, asOfMs: number): number {
+function dAiAt(t: number, asOfMs: number, dAiMonthsNow: number): number {
   const span = asOfMs - ACCEL_EPOCH_START;
-  if (span <= 0) return ACCEL_D1;
+  if (span <= 0) return dAiMonthsNow;
   const frac = Math.min(1, Math.max(0, (t - ACCEL_EPOCH_START) / span));
-  return ACCEL_D0 + (ACCEL_D1 - ACCEL_D0) * frac;
+  return ACCEL_D0 + (dAiMonthsNow - ACCEL_D0) * frac;
 }
 
 // Numeric integration (trapezoidal) of ai_doublings = ∫ dt(months) / D_ai(t) from release to asOf.
-function acceleratingDoublings(release: Date, asOf: Date, steps = 400): number {
+function acceleratingDoublings(release: Date, asOf: Date, dAiMonthsNow: number, steps = 400): number {
   const startMs = release.getTime();
   const endMs = asOf.getTime();
   if (endMs <= startMs) return 0;
@@ -66,8 +65,8 @@ function acceleratingDoublings(release: Date, asOf: Date, steps = 400): number {
     const tA = startMs + i * stepMs;
     const tB = startMs + (i + 1) * stepMs;
     const monthsStep = (tB - tA) / MS_PER_DAY / AVG_DAYS_PER_MONTH;
-    const rateA = 1 / dAiAt(tA, endMs);
-    const rateB = 1 / dAiAt(tB, endMs);
+    const rateA = 1 / dAiAt(tA, endMs, dAiMonthsNow);
+    const rateB = 1 / dAiAt(tB, endMs, dAiMonthsNow);
     total += (monthsStep * (rateA + rateB)) / 2;
   }
   return total;
@@ -96,7 +95,7 @@ export function computeAtem(
   let humanEquivYears: number;
 
   if (model === "accelerating") {
-    aiDoublings = acceleratingDoublings(release, asOf);
+    aiDoublings = acceleratingDoublings(release, asOf, params.dAiMonths);
     humanEquivYears = (aiDoublings * params.dClassicMonths) / 12;
   } else {
     aiDoublings = months / params.dAiMonths;
