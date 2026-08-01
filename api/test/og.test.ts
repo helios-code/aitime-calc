@@ -37,10 +37,14 @@ describe("renderOgPixels", () => {
     // A missing/broken embedded font still yields a valid, background-colored PNG —
     // asPng()'s magic bytes alone can't catch that, only the actual pixel content can.
     const img = renderOgPixels({ tool: "cursor-yolo-mode", date: "2026-07-30" });
+    // `.pixels` is a wasm-bindgen getter that copies the whole RGBA buffer out of wasm
+    // memory on every access — read it once, or a per-index loop turns into O(n) full
+    // 3MB buffer copies (this cost 158s in CI before being cached here).
+    const pixels = img.pixels;
     const bg = { r: 0x0b, g: 0x0f, b: 0x19 };
     let nonBackgroundPixels = 0;
-    for (let i = 0; i < img.pixels.length; i += 4) {
-      const [r, g, b] = [img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]];
+    for (let i = 0; i < pixels.length; i += 4) {
+      const [r, g, b] = [pixels[i], pixels[i + 1], pixels[i + 2]];
       if (r !== bg.r || g !== bg.g || b !== bg.b) nonBackgroundPixels++;
     }
     expect(nonBackgroundPixels).toBeGreaterThan(500);

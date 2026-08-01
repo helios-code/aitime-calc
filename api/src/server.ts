@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { Resvg } from "@resvg/resvg-js";
+import { Resvg, initWasm } from "@resvg/resvg-wasm";
 import { TOOLS } from "./dataset.js";
 import {
   computeAtem,
@@ -55,13 +56,19 @@ function escapeXml(s: string): string {
 
 // Embedded font, subset to Basic Latin + common punctuation (~45KB/42KB). The share-card
 // endpoint must render identically wherever it deploys — ambient system fonts aren't
-// guaranteed there, so resvg must not depend on them (loadSystemFonts: false below).
+// guaranteed there, so resvg must not depend on them. Loaded as buffers (not fontFiles
+// paths) since the wasm build has no reliable filesystem access of its own.
 const OG_FONT_DIR = join(dirname(fileURLToPath(import.meta.url)), "../assets/fonts");
 const OG_FONT_FAMILY = "DejaVu Sans";
-const OG_FONT_FILES = [
-  join(OG_FONT_DIR, "DejaVuSans-subset.ttf"),
-  join(OG_FONT_DIR, "DejaVuSans-Bold-subset.ttf"),
+const OG_FONT_BUFFERS = [
+  readFileSync(join(OG_FONT_DIR, "DejaVuSans-subset.ttf")),
+  readFileSync(join(OG_FONT_DIR, "DejaVuSans-Bold-subset.ttf")),
 ];
+
+// resvg-wasm requires the wasm module to be initialized once before any Resvg call.
+// Read from disk (not fetched) so it works identically in Node without a bundler.
+const require = createRequire(import.meta.url);
+await initWasm(readFileSync(require.resolve("@resvg/resvg-wasm/index_bg.wasm")));
 
 const OG_CARD_WIDTH = 1200;
 const OG_CONTENT_X = 60;
@@ -137,8 +144,7 @@ export function renderOgPixels(q: OgQuery) {
   const svg = buildOgSvg(q);
   return new Resvg(svg, {
     font: {
-      fontFiles: OG_FONT_FILES,
-      loadSystemFonts: false,
+      fontBuffers: OG_FONT_BUFFERS,
       defaultFontFamily: OG_FONT_FAMILY,
     },
   }).render();
