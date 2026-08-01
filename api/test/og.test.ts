@@ -10,7 +10,7 @@ describe("GET /api/og", () => {
     const app = buildServer();
     const res = await app.inject({
       method: "GET",
-      url: "/api/og?tool=cursor-yolo-mode&as_of=2026-07-30&date=2026-07-30",
+      url: "/api/og?tool=cursor-yolo-mode&date=2026-07-30",
     });
     expect(res.statusCode).toBe(200);
     expect(res.headers["content-type"]).toContain("image/svg+xml");
@@ -40,11 +40,22 @@ describe("GET /api/og", () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it("escapes tool text to avoid raw SVG/XSS injection", async () => {
+  it("escapes special XML chars in tool text (real dataset entry with '&')", async () => {
     const app = buildServer();
-    const res = await app.inject({ method: "GET", url: "/api/og?tool=cursor-yolo-mode" });
+    const res = await app.inject({ method: "GET", url: "/api/og?tool=llama-4&date=2026-07-30" });
     expect(res.statusCode).toBe(200);
-    expect(res.body).not.toContain("<script");
+    expect(res.body).toContain("Scout &amp; Maverick");
+    expect(res.body).not.toContain("Scout & Maverick");
+  });
+
+  it("400s on a date before the tool's release date", async () => {
+    const app = buildServer();
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/og?tool=cursor-yolo-mode&date=1999-01-01",
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toBeTruthy();
   });
 
   it("shrinks font-size so even the longest dataset tool name fits the card width", () => {

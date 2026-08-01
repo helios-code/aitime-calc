@@ -94,6 +94,9 @@ function buildOgSvg(q: OgQuery): string {
   if (!isValidDate(asOf)) {
     throw { status: 400, error: `invalid date: ${asOfStr}` };
   }
+  if (asOf.getTime() < release.getTime()) {
+    throw { status: 400, error: `date ${asOfStr} is before ${tool.name}'s release date` };
+  }
 
   const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
   const heroLine = `${tool.name} = ~${yearsToHuman(result.humanEquivYears)}`;
