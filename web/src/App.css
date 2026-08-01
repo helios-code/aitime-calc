@@ -67,7 +67,7 @@
 }
 
 .mode-tab.active, .model-btn.active {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--accent-btn), var(--accent-2-btn));
   color: #06070c;
 }
 
@@ -80,7 +80,12 @@
   max-width: 480px;
 }
 
-.tool-select {
+.tool-combobox {
+  position: relative;
+  width: 100%;
+}
+
+.tool-input {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -88,7 +93,91 @@
   padding: 14px 16px;
   border-radius: 12px;
   font-size: 16px;
-  appearance: none;
+}
+
+.tool-input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
+
+.tool-listbox {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  padding: 6px;
+}
+
+.tool-listbox ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tool-group {
+  display: block;
+}
+
+.tool-group-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  padding: 8px 10px 4px;
+}
+
+.tool-option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: var(--text-h);
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tool-option-name {
+  font-weight: 600;
+}
+
+.tool-option-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.tool-option--active,
+.tool-option:hover {
+  background: var(--bg-alt);
+}
+
+.tool-empty {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
 .tool-note {
@@ -122,11 +211,32 @@
 
 /* result hero */
 .result-panel {
+  min-height: 420px;
+  display: flex;
+  align-items: stretch;
   transition: opacity 0.2s ease;
 }
 
 .result-panel--loading {
   opacity: 0.5;
+}
+
+.result-skeleton {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: linear-gradient(100deg, var(--surface) 30%, var(--bg-alt) 50%, var(--surface) 70%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .result-hero {
@@ -271,7 +381,7 @@
   font-size: 12px;
   font-weight: 700;
   color: #06070c;
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  background: linear-gradient(135deg, var(--accent-2-btn), var(--accent-btn));
   padding: 4px 8px;
   border-radius: 6px;
   opacity: 0;
@@ -293,6 +403,66 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+/* share card */
+.share-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.share-card-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.share-card-text {
+  font-size: 15px;
+  color: var(--text-h);
+  line-height: 1.5;
+}
+
+.share-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.share-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent-btn), var(--accent-2-btn));
+  color: #06070c;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.share-btn:hover {
+  opacity: 0.9;
+}
+
+.share-btn:active {
+  transform: scale(0.97);
+}
+
+.share-btn--ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+.share-card-status {
+  font-size: 13px;
+  color: #f87171;
 }
 
 /* methodology */

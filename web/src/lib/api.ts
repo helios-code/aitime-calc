@@ -57,6 +57,10 @@ export async function fetchCalc(params: CalcParams): Promise<CalcResultWithSourc
     if (typeof data?.human_equiv_years !== 'number') throw new Error('malformed calc payload')
     return { result: data, source: 'live' }
   } catch {
-    return { result: computeCalc(params), source: 'mock' }
+    try {
+      return { result: computeCalc(params), source: 'mock' }
+    } catch {
+      return { result: computeCalc({ ...params, release_date: '2022-11-30' }), source: 'mock' }
+    }
   }
 }

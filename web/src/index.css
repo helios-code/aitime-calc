@@ -8,18 +8,42 @@
   --text-dim: #767c92;
   --accent: #7c5cff;
   --accent-2: #22d3ee;
+  /* dedicated stops for accent gradients that carry dark text on top of them —
+     kept separate from --accent so the plain-text/border uses of --accent can
+     stay theme-brand-accurate while still passing WCAG AA for on-gradient text */
+  --accent-btn: var(--accent);
+  --accent-2-btn: var(--accent-2);
   --danger-cool: #3a3f55;
   --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
 
   font: 18px/1.5 var(--sans);
-  color-scheme: dark;
+  color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f6fb;
+    --bg-alt: #ffffff;
+    --surface: #ffffff;
+    --border: #e1e3ee;
+    --text: #40445a;
+    --text-h: #12131c;
+    --text-dim: #676c85;
+    --accent: #6935ff;
+    --accent-2: #0891b2;
+    /* lighter than --accent: #06070c text on the raw --accent stop was ~3:1;
+       #8b5cf6 keeps the hue but clears WCAG AA (>=4.5:1) across the gradient */
+    --accent-btn: #8b5cf6;
+    --accent-2-btn: var(--accent-2);
+    --danger-cool: #dfe1ee;
+  }
 }
 
 * {
@@ -34,6 +58,15 @@ body {
     radial-gradient(ellipse 60% 40% at 100% 100%, rgba(34, 211, 238, 0.12), transparent),
     var(--bg);
   background-attachment: fixed;
+}
+
+@media (prefers-color-scheme: light) {
+  body {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(105, 53, 255, 0.10), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(8, 145, 178, 0.08), transparent),
+      var(--bg);
+  }
 }
 
 #root {

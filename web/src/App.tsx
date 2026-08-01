@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { fetchCalc, fetchTools } from './lib/api'
+import { parseInitialState } from './lib/urlParams'
 import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from './data/tools'
 import type { CalcModel, CalcResult, Tool } from './types'
 import { ModeTabs } from './components/ModeTabs'
@@ -8,18 +9,21 @@ import { ToolPicker } from './components/ToolPicker'
 import { DatePicker } from './components/DatePicker'
 import { ModelToggle } from './components/ModelToggle'
 import { ResultHero } from './components/ResultHero'
+import { ShareCard } from './components/ShareCard'
 import { MethodologyExplainer } from './components/MethodologyExplainer'
 import { SourceBadge } from './components/SourceBadge'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
+const initial = parseInitialState(window.location.search)
+
 function App() {
   const [tools, setTools] = useState<Tool[]>(FALLBACK_TOOLS)
   const [toolsSource, setToolsSource] = useState<'live' | 'mock'>('mock')
-  const [mode, setMode] = useState<'tool' | 'date'>('tool')
-  const [selectedToolId, setSelectedToolId] = useState(DEFAULT_TOOL_ID)
-  const [customDate, setCustomDate] = useState('2022-11-30')
-  const [model, setModel] = useState<CalcModel>('base')
+  const [mode, setMode] = useState<'tool' | 'date'>(initial.mode)
+  const [selectedToolId, setSelectedToolId] = useState(initial.tool ?? DEFAULT_TOOL_ID)
+  const [customDate, setCustomDate] = useState(initial.date ?? '2022-11-30')
+  const [model, setModel] = useState<CalcModel>(initial.model)
   const [result, setResult] = useState<CalcResult | null>(null)
   const [calcSource, setCalcSource] = useState<'live' | 'mock'>('mock')
   const [loading, setLoading] = useState(true)
@@ -30,6 +34,7 @@ function App() {
       if (cancelled) return
       setTools(tools)
       setToolsSource(source)
+      setSelectedToolId((id) => (tools.some((t) => t.id === id) ? id : DEFAULT_TOOL_ID))
     })
     return () => {
       cancelled = true
@@ -45,6 +50,18 @@ function App() {
     () => (mode === 'tool' ? tools.find((t) => t.id === selectedToolId) : undefined),
     [mode, selectedToolId, tools],
   )
+
+  const shareUrl = useMemo(() => {
+    const url = new URL(window.location.href)
+    url.search = ''
+    if (mode === 'tool') {
+      url.searchParams.set('tool', selectedToolId)
+    } else {
+      url.searchParams.set('date', customDate)
+    }
+    url.searchParams.set('model', model)
+    return url.toString()
+  }, [mode, selectedToolId, customDate, model])
 
   useEffect(() => {
     if (!releaseDate) return
@@ -80,8 +97,18 @@ function App() {
         </section>
 
         <section className={loading ? 'result-panel result-panel--loading' : 'result-panel'}>
-          {result && <ResultHero result={result} toolName={selectedTool?.name} />}
+          {result ? (
+            <ResultHero result={result} toolName={selectedTool?.name} />
+          ) : (
+            <div className="result-skeleton" aria-hidden="true" />
+          )}
         </section>
+
+        {result && (
+          <section className="share-section">
+            <ShareCard result={result} toolName={selectedTool?.name} shareUrl={shareUrl} />
+          </section>
+        )}
 
         {result && <MethodologyExplainer result={result} />}
       </main>
