@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { computeAtem, DEFAULT_PARAMS } from "../src/atem.js";
 import { TOOLS } from "../src/dataset.js";
+// Dataset field/shape assertions moved to dataset.test.ts.
 
 describe("ATEM base model", () => {
   it("anchors Cursor YOLO (~2024-11) at ~27 human-years as of 2026-07-30", () => {
@@ -59,21 +60,5 @@ describe("ATEM accelerating model", () => {
     // Accelerating model spends more time at the slower (7mo) doubling rate for old
     // releases, so fewer doublings accrue per elapsed month than the flat base rate.
     expect(accel.aiDoublings).toBeLessThan(base.aiDoublings);
-  });
-});
-
-describe("dataset", () => {
-  it("has 15-25 curated tools with required fields", () => {
-    expect(TOOLS.length).toBeGreaterThanOrEqual(15);
-    expect(TOOLS.length).toBeLessThanOrEqual(25);
-    for (const t of TOOLS) {
-      expect(t.id).toBeTruthy();
-      expect(t.name).toBeTruthy();
-      expect(t.vendor).toBeTruthy();
-      expect(t.release_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-      expect(t.category).toBeTruthy();
-    }
-    const ids = new Set(TOOLS.map((t) => t.id));
-    expect(ids.size).toBe(TOOLS.length);
   });
 });
