@@ -1,0 +1,29 @@
+# fly.toml — aitime-calc ATEM API
+# App name is set at `fly launch`/`fly apps create` time; fill in below.
+app = "aitime-calc-api"
+primary_region = "cdg"
+
+[build]
+
+[env]
+  PORT = "3001"
+  # WEB_ORIGIN is set as a deploy-time secret/env (see docs/deploy-api.md), not hardcoded here.
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { TOOLS } from "./dataset.js";
@@ -8,6 +11,11 @@ import {
   yearsToHuman,
   type CalcModel,
 } from "./atem.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PKG_VERSION: string = JSON.parse(
+  readFileSync(join(__dirname, "../package.json"), "utf-8"),
+).version;
 
 const ATEM_SOURCES = [
   "METR — Measuring AI Ability to Complete Long Tasks (2025-03)",
@@ -91,10 +99,19 @@ function buildCalcResponse(q: CalcQuery) {
   };
 }
 
+const LOCALHOST_ORIGIN_RE = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
 export function buildServer() {
   const app = Fastify({ logger: false });
 
-  app.register(cors, { origin: true });
+  const webOrigin = process.env.WEB_ORIGIN;
+  app.register(cors, {
+    origin: webOrigin
+      ? [webOrigin, LOCALHOST_ORIGIN_RE]
+      : LOCALHOST_ORIGIN_RE,
+  });
+
+  app.get("/api/health", async () => ({ ok: true, version: PKG_VERSION }));
 
   app.get("/api/tools", async () => ({ tools: TOOLS }));
 
