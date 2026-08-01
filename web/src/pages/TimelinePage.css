@@ -1,0 +1,83 @@
+.timeline-page .app-main {
+  gap: 24px;
+}
+
+.timeline-nav a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.timeline-nav a:hover,
+.timeline-nav a:focus-visible {
+  color: var(--accent-2);
+}
+
+.timeline-chart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.timeline-gridline line {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.timeline-gridline text {
+  fill: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.timeline-x-label {
+  fill: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.timeline-axis {
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.timeline-curve {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.6;
+}
+
+.timeline-point circle {
+  fill: var(--accent-2);
+  stroke: var(--bg);
+  stroke-width: 2;
+  transition: r 0.15s ease, fill 0.15s ease;
+}
+
+.timeline-point:hover circle,
+.timeline-point:focus-visible circle {
+  fill: var(--accent);
+  r: 9;
+}
+
+.timeline-point:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.timeline-caption {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .timeline-gridline text,
+  .timeline-x-label {
+    font-size: 9px;
+  }
+}
