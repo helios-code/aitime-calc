@@ -31,3 +31,11 @@ export interface CalcResult {
   methodology_note: string
   sources: string[]
 }
+
+export interface LeaderboardEntry {
+  rank: number
+  tool_id: string
+  name: string
+  human_equiv_years: number
+  release_date: string
+}
