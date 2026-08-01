@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import { Resvg } from "@resvg/resvg-js";
 import { TOOLS } from "./dataset.js";
 import {
   computeAtem,
@@ -73,7 +74,7 @@ export function fitFontSize(
   return Math.max(minFontSize, fitted);
 }
 
-function buildOgSvg(q: OgQuery): string {
+export function buildOgSvg(q: OgQuery): string {
   const toolId = q.tool;
   if (!toolId) {
     throw { status: 400, error: "tool is required" };
@@ -200,8 +201,9 @@ export function buildServer() {
   app.get<{ Querystring: OgQuery }>("/api/og", async (req, reply) => {
     try {
       const svg = buildOgSvg(req.query);
-      reply.header("Content-Type", "image/svg+xml");
-      return svg;
+      const png = new Resvg(svg).render().asPng();
+      reply.header("Content-Type", "image/png");
+      return png;
     } catch (err: any) {
       if (err?.status && err?.error) {
         reply.code(err.status);
