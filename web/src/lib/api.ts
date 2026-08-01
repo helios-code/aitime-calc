@@ -4,6 +4,11 @@ import { FALLBACK_TOOLS } from '../data/tools'
 
 const TIMEOUT_MS = 2000
 
+// In dev, Vite proxies /api -> localhost:3001 (see vite.config.ts), so a relative
+// path works and API_BASE stays ''. In a static prod deploy (Vercel) there is no
+// proxy, so VITE_API_URL must be set at build time to the deployed API's origin.
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
+
 async function withTimeout<T>(promise: Promise<T>): Promise<T> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
@@ -21,7 +26,7 @@ export interface ToolsResult {
 
 export async function fetchTools(): Promise<ToolsResult> {
   try {
-    const res = await withTimeout(fetch('/api/tools', { signal: AbortSignal.timeout(TIMEOUT_MS) }))
+    const res = await withTimeout(fetch(`${API_BASE}/api/tools`, { signal: AbortSignal.timeout(TIMEOUT_MS) }))
     if (!res.ok) throw new Error(`status ${res.status}`)
     const data = await res.json()
     if (!Array.isArray(data?.tools) || data.tools.length === 0) throw new Error('empty tools payload')
@@ -46,7 +51,7 @@ export async function fetchCalc(params: CalcParams): Promise<CalcResultWithSourc
     if (params.d_classic_months) query.set('d_classic_months', String(params.d_classic_months))
     if (params.d_ai_months) query.set('d_ai_months', String(params.d_ai_months))
 
-    const res = await withTimeout(fetch(`/api/calc?${query}`, { signal: AbortSignal.timeout(TIMEOUT_MS) }))
+    const res = await withTimeout(fetch(`${API_BASE}/api/calc?${query}`, { signal: AbortSignal.timeout(TIMEOUT_MS) }))
     if (!res.ok) throw new Error(`status ${res.status}`)
     const data = await res.json()
     if (typeof data?.human_equiv_years !== 'number') throw new Error('malformed calc payload')
