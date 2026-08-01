@@ -7,7 +7,7 @@ const TIMEOUT_MS = 2000
 // In dev, Vite proxies /api -> localhost:3001 (see vite.config.ts), so a relative
 // path works and API_BASE stays ''. In a static prod deploy (Vercel) there is no
 // proxy, so VITE_API_URL must be set at build time to the deployed API's origin.
-const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
+export const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
 
 async function withTimeout<T>(promise: Promise<T>): Promise<T> {
   const controller = new AbortController()
