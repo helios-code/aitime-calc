@@ -3,6 +3,13 @@
     "agent-relay": {
       "type": "http",
       "url": "http://localhost:8090/mcp"
+    },
+    "trovex": {
+      "headers": {
+        "X-TROVEX-Write-Token": "${NIWA_MCP_X_TROVEX_WRITE_TOKEN_TROVEX}"
+      },
+      "type": "http",
+      "url": "http://localhost:8765/mcp"
     }
   }
 }
