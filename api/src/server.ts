@@ -52,6 +52,27 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
+const OG_CARD_WIDTH = 1200;
+const OG_CONTENT_X = 60;
+const OG_CONTENT_MAX_WIDTH = OG_CARD_WIDTH - OG_CONTENT_X * 2;
+// Conservative average glyph-width/font-size ratio for a bold sans-serif — used to
+// pre-shrink text server-side since SVG has no server-side text-measurement API.
+const OG_AVG_CHAR_WIDTH_RATIO = 0.6;
+const OG_MIN_FONT_SIZE = 22;
+
+// Shrinks fontSize so `text` fits within maxWidthPx, never below minFontSize.
+export function fitFontSize(
+  text: string,
+  baseFontSize: number,
+  maxWidthPx: number = OG_CONTENT_MAX_WIDTH,
+  minFontSize: number = OG_MIN_FONT_SIZE,
+): number {
+  const estWidthAtBase = text.length * baseFontSize * OG_AVG_CHAR_WIDTH_RATIO;
+  if (estWidthAtBase <= maxWidthPx) return baseFontSize;
+  const fitted = maxWidthPx / (text.length * OG_AVG_CHAR_WIDTH_RATIO);
+  return Math.max(minFontSize, fitted);
+}
+
 function buildOgSvg(q: OgQuery): string {
   const toolId = q.tool;
   if (!toolId) {
@@ -82,13 +103,16 @@ function buildOgSvg(q: OgQuery): string {
   const hero = escapeXml(heroLine);
   const modelLabel = escapeXml(`${model} model`);
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#0b0f19"/>
-  <text x="60" y="120" font-family="sans-serif" font-size="32" fill="#8b93a7">${vendor}</text>
-  <text x="60" y="180" font-family="sans-serif" font-size="48" font-weight="bold" fill="#ffffff">${name}</text>
-  <text x="60" y="320" font-family="sans-serif" font-size="56" font-weight="bold" fill="#7cf5c4">${hero}</text>
-  <text x="60" y="380" font-family="sans-serif" font-size="28" fill="#8b93a7">${modelLabel}</text>
-  <text x="60" y="580" font-family="sans-serif" font-size="24" fill="#5b6377">aitime-calc</text>
+  const nameFontSize = fitFontSize(tool.name, 48);
+  const heroFontSize = fitFontSize(heroLine, 56);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_CARD_WIDTH}" height="630" viewBox="0 0 ${OG_CARD_WIDTH} 630">
+  <rect width="${OG_CARD_WIDTH}" height="630" fill="#0b0f19"/>
+  <text x="${OG_CONTENT_X}" y="120" font-family="sans-serif" font-size="32" fill="#8b93a7">${vendor}</text>
+  <text x="${OG_CONTENT_X}" y="180" font-family="sans-serif" font-size="${nameFontSize}" font-weight="bold" fill="#ffffff">${name}</text>
+  <text x="${OG_CONTENT_X}" y="320" font-family="sans-serif" font-size="${heroFontSize}" font-weight="bold" fill="#7cf5c4">${hero}</text>
+  <text x="${OG_CONTENT_X}" y="380" font-family="sans-serif" font-size="28" fill="#8b93a7">${modelLabel}</text>
+  <text x="${OG_CONTENT_X}" y="580" font-family="sans-serif" font-size="24" fill="#5b6377">aitime-calc</text>
 </svg>`;
 }
 

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildServer } from "../src/server.js";
+import { buildServer, fitFontSize } from "../src/server.js";
+import { TOOLS } from "../src/dataset.js";
+
+const OG_CONTENT_MAX_WIDTH = 1080; // OG_CARD_WIDTH(1200) - 2*OG_CONTENT_X(60)
+const AVG_CHAR_WIDTH_RATIO = 0.6; // must match server.ts OG_AVG_CHAR_WIDTH_RATIO
 
 describe("GET /api/og", () => {
   it("returns an SVG card for a known tool", async () => {
@@ -41,5 +45,24 @@ describe("GET /api/og", () => {
     const res = await app.inject({ method: "GET", url: "/api/og?tool=cursor-yolo-mode" });
     expect(res.statusCode).toBe(200);
     expect(res.body).not.toContain("<script");
+  });
+
+  it("shrinks font-size so even the longest dataset tool name fits the card width", () => {
+    const longest = TOOLS.reduce((a, b) => (b.name.length > a.name.length ? b : a));
+    const fitted = fitFontSize(longest.name, 48);
+    expect(fitted * longest.name.length * AVG_CHAR_WIDTH_RATIO).toBeLessThanOrEqual(
+      OG_CONTENT_MAX_WIDTH + 0.01,
+    );
+  });
+
+  it("renders a fitted (non-clipped) name for the longest dataset tool", async () => {
+    const longest = TOOLS.reduce((a, b) => (b.name.length > a.name.length ? b : a));
+    const app = buildServer();
+    const res = await app.inject({
+      method: "GET",
+      url: `/api/og?tool=${encodeURIComponent(longest.id)}&date=2026-07-30`,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain(longest.name);
   });
 });
