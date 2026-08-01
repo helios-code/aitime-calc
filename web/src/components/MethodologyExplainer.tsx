@@ -27,6 +27,9 @@ export function MethodologyExplainer({ result }: Props) {
         <p className="methodology-sources">
           Sources: {result.sources.join(' · ')}
         </p>
+        <a className="methodology-full-link" href="/methodology">
+          Full methodology, worked example &amp; limitations →
+        </a>
       </div>
     </details>
   )
