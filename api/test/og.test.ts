@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildServer, buildOgSvg, fitFontSize } from "../src/server.js";
+import { buildServer, buildOgSvg, fitFontSize, renderOgPixels } from "../src/server.js";
 import { TOOLS } from "../src/dataset.js";
 
 const OG_CONTENT_MAX_WIDTH = 1080; // OG_CARD_WIDTH(1200) - 2*OG_CONTENT_X(60)
 const AVG_CHAR_WIDTH_RATIO = 0.6; // must match server.ts OG_AVG_CHAR_WIDTH_RATIO
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
 
-describe("buildOgSvg (SVG string, pre-rasterization)", () => {
+describe("buildOgSvg", () => {
   it("escapes special XML chars in tool text (real dataset entry with '&')", () => {
     const svg = buildOgSvg({ tool: "llama-4", date: "2026-07-30" });
     expect(svg).toContain("Scout &amp; Maverick");
@@ -29,6 +29,21 @@ describe("buildOgSvg (SVG string, pre-rasterization)", () => {
     const longest = TOOLS.reduce((a, b) => (b.name.length > a.name.length ? b : a));
     const svg = buildOgSvg({ tool: longest.id, date: "2026-07-30" });
     expect(svg).toContain(longest.name);
+  });
+});
+
+describe("renderOgPixels", () => {
+  it("paints non-background pixels using the embedded font (catches a blank-text regression)", () => {
+    // A missing/broken embedded font still yields a valid, background-colored PNG —
+    // asPng()'s magic bytes alone can't catch that, only the actual pixel content can.
+    const img = renderOgPixels({ tool: "cursor-yolo-mode", date: "2026-07-30" });
+    const bg = { r: 0x0b, g: 0x0f, b: 0x19 };
+    let nonBackgroundPixels = 0;
+    for (let i = 0; i < img.pixels.length; i += 4) {
+      const [r, g, b] = [img.pixels[i], img.pixels[i + 1], img.pixels[i + 2]];
+      if (r !== bg.r || g !== bg.g || b !== bg.b) nonBackgroundPixels++;
+    }
+    expect(nonBackgroundPixels).toBeGreaterThan(500);
   });
 });
 

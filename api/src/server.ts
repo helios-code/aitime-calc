@@ -53,6 +53,16 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
+// Embedded font, subset to Basic Latin + common punctuation (~45KB/42KB). The share-card
+// endpoint must render identically wherever it deploys — ambient system fonts aren't
+// guaranteed there, so resvg must not depend on them (loadSystemFonts: false below).
+const OG_FONT_DIR = join(dirname(fileURLToPath(import.meta.url)), "../assets/fonts");
+const OG_FONT_FAMILY = "DejaVu Sans";
+const OG_FONT_FILES = [
+  join(OG_FONT_DIR, "DejaVuSans-subset.ttf"),
+  join(OG_FONT_DIR, "DejaVuSans-Bold-subset.ttf"),
+];
+
 const OG_CARD_WIDTH = 1200;
 const OG_CONTENT_X = 60;
 const OG_CONTENT_MAX_WIDTH = OG_CARD_WIDTH - OG_CONTENT_X * 2;
@@ -112,12 +122,26 @@ export function buildOgSvg(q: OgQuery): string {
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_CARD_WIDTH}" height="630" viewBox="0 0 ${OG_CARD_WIDTH} 630">
   <rect width="${OG_CARD_WIDTH}" height="630" fill="#0b0f19"/>
-  <text x="${OG_CONTENT_X}" y="120" font-family="sans-serif" font-size="32" fill="#8b93a7">${vendor}</text>
-  <text x="${OG_CONTENT_X}" y="180" font-family="sans-serif" font-size="${nameFontSize}" font-weight="bold" fill="#ffffff">${name}</text>
-  <text x="${OG_CONTENT_X}" y="320" font-family="sans-serif" font-size="${heroFontSize}" font-weight="bold" fill="#7cf5c4">${hero}</text>
-  <text x="${OG_CONTENT_X}" y="380" font-family="sans-serif" font-size="28" fill="#8b93a7">${modelLabel}</text>
-  <text x="${OG_CONTENT_X}" y="580" font-family="sans-serif" font-size="24" fill="#5b6377">aitime-calc</text>
+  <text x="${OG_CONTENT_X}" y="120" font-family="${OG_FONT_FAMILY}" font-size="32" fill="#8b93a7">${vendor}</text>
+  <text x="${OG_CONTENT_X}" y="180" font-family="${OG_FONT_FAMILY}" font-size="${nameFontSize}" font-weight="bold" fill="#ffffff">${name}</text>
+  <text x="${OG_CONTENT_X}" y="320" font-family="${OG_FONT_FAMILY}" font-size="${heroFontSize}" font-weight="bold" fill="#7cf5c4">${hero}</text>
+  <text x="${OG_CONTENT_X}" y="380" font-family="${OG_FONT_FAMILY}" font-size="28" fill="#8b93a7">${modelLabel}</text>
+  <text x="${OG_CONTENT_X}" y="580" font-family="${OG_FONT_FAMILY}" font-size="24" fill="#5b6377">aitime-calc</text>
 </svg>`;
+}
+
+// Renders the RGBA pixel buffer (not just the PNG bytes) so tests can assert glyphs
+// actually painted, since a missing/broken embedded font still produces a valid,
+// blank PNG.
+export function renderOgPixels(q: OgQuery) {
+  const svg = buildOgSvg(q);
+  return new Resvg(svg, {
+    font: {
+      fontFiles: OG_FONT_FILES,
+      loadSystemFonts: false,
+      defaultFontFamily: OG_FONT_FAMILY,
+    },
+  }).render();
 }
 
 function buildCalcResponse(q: CalcQuery) {
@@ -200,8 +224,7 @@ export function buildServer() {
 
   app.get<{ Querystring: OgQuery }>("/api/og", async (req, reply) => {
     try {
-      const svg = buildOgSvg(req.query);
-      const png = new Resvg(svg).render().asPng();
+      const png = renderOgPixels(req.query).asPng();
       reply.header("Content-Type", "image/png");
       return png;
     } catch (err: any) {
