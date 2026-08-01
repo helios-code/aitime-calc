@@ -33,8 +33,63 @@ interface CalcQuery {
   d_ai_months?: string | number;
 }
 
+interface OgQuery {
+  tool?: string;
+  model?: string;
+  date?: string;
+}
+
 function isValidDate(d: Date): boolean {
   return !Number.isNaN(d.getTime());
+}
+
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function buildOgSvg(q: OgQuery): string {
+  const toolId = q.tool;
+  if (!toolId) {
+    throw { status: 400, error: "tool is required" };
+  }
+  const tool = TOOLS.find((t) => t.id === toolId);
+  if (!tool) {
+    throw { status: 400, error: `unknown tool: ${toolId}` };
+  }
+
+  if (q.model !== undefined && q.model !== "base" && q.model !== "accelerating") {
+    throw { status: 400, error: `unknown model: ${q.model}` };
+  }
+  const model: CalcModel = q.model === "accelerating" ? "accelerating" : "base";
+
+  const release = new Date(`${tool.release_date}T00:00:00Z`);
+  const asOfStr = q.date ?? new Date().toISOString().slice(0, 10);
+  const asOf = new Date(`${asOfStr}T00:00:00Z`);
+  if (!isValidDate(asOf)) {
+    throw { status: 400, error: `invalid date: ${asOfStr}` };
+  }
+
+  const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
+  const heroLine = `${tool.name} = ~${yearsToHuman(result.humanEquivYears)}`;
+
+  const name = escapeXml(tool.name);
+  const vendor = escapeXml(tool.vendor);
+  const hero = escapeXml(heroLine);
+  const modelLabel = escapeXml(`${model} model`);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0b0f19"/>
+  <text x="60" y="120" font-family="sans-serif" font-size="32" fill="#8b93a7">${vendor}</text>
+  <text x="60" y="180" font-family="sans-serif" font-size="48" font-weight="bold" fill="#ffffff">${name}</text>
+  <text x="60" y="320" font-family="sans-serif" font-size="56" font-weight="bold" fill="#7cf5c4">${hero}</text>
+  <text x="60" y="380" font-family="sans-serif" font-size="28" fill="#8b93a7">${modelLabel}</text>
+  <text x="60" y="580" font-family="sans-serif" font-size="24" fill="#5b6377">aitime-calc</text>
+</svg>`;
 }
 
 function buildCalcResponse(q: CalcQuery) {
@@ -114,6 +169,20 @@ export function buildServer() {
   app.get("/api/health", async () => ({ ok: true, version: PKG_VERSION }));
 
   app.get("/api/tools", async () => ({ tools: TOOLS }));
+
+  app.get<{ Querystring: OgQuery }>("/api/og", async (req, reply) => {
+    try {
+      const svg = buildOgSvg(req.query);
+      reply.header("Content-Type", "image/svg+xml");
+      return svg;
+    } catch (err: any) {
+      if (err?.status && err?.error) {
+        reply.code(err.status);
+        return { error: err.error };
+      }
+      throw err;
+    }
+  });
 
   app.get<{ Querystring: CalcQuery }>("/api/calc", async (req, reply) => {
     try {
