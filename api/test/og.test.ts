@@ -32,6 +32,35 @@ describe("buildOgSvg", () => {
   });
 });
 
+describe("buildOgSvg date-mode (no tool)", () => {
+  it("renders a card from a bare release date, no tool_id", () => {
+    const svg = buildOgSvg({ date: "2022-11-30" });
+    expect(svg).toContain("By Nov 2022");
+    expect(svg).toContain("base model");
+  });
+
+  it("respects the model param in date-mode", () => {
+    const svg = buildOgSvg({ date: "2022-11-30", model: "accelerating" });
+    expect(svg).toContain("accelerating model");
+  });
+
+  it("400s on unknown model in date-mode", () => {
+    expect(() => buildOgSvg({ date: "2022-11-30", model: "nope" })).toThrow();
+  });
+
+  it("400s on an invalid date in date-mode", () => {
+    expect(() => buildOgSvg({ date: "not-a-date" })).toThrow();
+  });
+
+  it("400s on a future release date (asOf is always today)", () => {
+    expect(() => buildOgSvg({ date: "2999-01-01" })).toThrow();
+  });
+
+  it("400s when neither tool nor date is given", () => {
+    expect(() => buildOgSvg({})).toThrow();
+  });
+});
+
 describe("renderOgPixels", () => {
   it("paints non-background pixels using the embedded font (catches a blank-text regression)", () => {
     // A missing/broken embedded font still yields a valid, background-colored PNG —
@@ -94,5 +123,17 @@ describe("GET /api/og", () => {
     });
     expect(res.statusCode).toBe(400);
     expect(res.json().error).toBeTruthy();
+  });
+
+  it("returns a PNG card for date-mode (no tool_id)", async () => {
+    const app = buildServer();
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/og?date=2022-11-30&model=base",
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers["content-type"]).toContain("image/png");
+    expect(res.rawPayload.subarray(0, 4).equals(PNG_MAGIC)).toBe(true);
+    expect(res.rawPayload.length).toBeGreaterThan(500);
   });
 });

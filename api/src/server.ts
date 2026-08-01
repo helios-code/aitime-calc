@@ -91,10 +91,58 @@ export function fitFontSize(
   return Math.max(minFontSize, fitted);
 }
 
+function formatDateLabel(d: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(d);
+}
+
+// Date-mode card: no tool_id, `date` is the release_date input (same semantics as
+// /api/calc's date mode — release_date=date, as_of=today). Mirrors the tool-mode
+// card layout but without a vendor/tool-name line, since there is no tool.
+function buildDateModeOgSvg(dateStr: string, modelParam?: string): string {
+  if (modelParam !== undefined && modelParam !== "base" && modelParam !== "accelerating") {
+    throw { status: 400, error: `unknown model: ${modelParam}` };
+  }
+  const model: CalcModel = modelParam === "accelerating" ? "accelerating" : "base";
+
+  const release = new Date(`${dateStr}T00:00:00Z`);
+  if (!isValidDate(release)) {
+    throw { status: 400, error: `invalid date: ${dateStr}` };
+  }
+
+  const asOfStr = new Date().toISOString().slice(0, 10);
+  const asOf = new Date(`${asOfStr}T00:00:00Z`);
+  if (asOf.getTime() < release.getTime()) {
+    throw { status: 400, error: `date ${dateStr} is in the future` };
+  }
+
+  const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
+  const heroLine = `By ${formatDateLabel(release)} = ~${yearsToHuman(result.humanEquivYears)}`;
+
+  const eyebrow = escapeXml("release date");
+  const hero = escapeXml(heroLine);
+  const modelLabel = escapeXml(`${model} model`);
+  const heroFontSize = fitFontSize(heroLine, 56);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_CARD_WIDTH}" height="630" viewBox="0 0 ${OG_CARD_WIDTH} 630">
+  <rect width="${OG_CARD_WIDTH}" height="630" fill="#0b0f19"/>
+  <text x="${OG_CONTENT_X}" y="120" font-family="${OG_FONT_FAMILY}" font-size="32" fill="#8b93a7">${eyebrow}</text>
+  <text x="${OG_CONTENT_X}" y="320" font-family="${OG_FONT_FAMILY}" font-size="${heroFontSize}" font-weight="bold" fill="#7cf5c4">${hero}</text>
+  <text x="${OG_CONTENT_X}" y="380" font-family="${OG_FONT_FAMILY}" font-size="28" fill="#8b93a7">${modelLabel}</text>
+  <text x="${OG_CONTENT_X}" y="580" font-family="${OG_FONT_FAMILY}" font-size="24" fill="#5b6377">aitime-calc</text>
+</svg>`;
+}
+
 export function buildOgSvg(q: OgQuery): string {
   const toolId = q.tool;
   if (!toolId) {
-    throw { status: 400, error: "tool is required" };
+    if (!q.date) {
+      throw { status: 400, error: "tool or date is required" };
+    }
+    return buildDateModeOgSvg(q.date, q.model);
   }
   const tool = TOOLS.find((t) => t.id === toolId);
   if (!tool) {
