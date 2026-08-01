@@ -1,0 +1,9 @@
+DejaVuSans-subset.ttf / DejaVuSans-Bold-subset.ttf
+
+Subset (Basic Latin + common punctuation only) of the DejaVu Sans font family,
+itself derived from Bitstream Vera. Licensed under the Bitstream Vera License
+with the DejaVu font license modifications — both permit unrestricted use,
+copying, modification, and redistribution.
+
+Full text: https://dejavu-fonts.github.io/License.html
+Original: https://dejavu-fonts.github.io/
