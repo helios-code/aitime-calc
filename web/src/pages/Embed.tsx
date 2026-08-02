@@ -60,7 +60,7 @@ export default function Embed() {
       ) : (
         <div className="result-skeleton embed-skeleton" aria-hidden="true" />
       )}
-      <a className="embed-attribution" href="/" target="_top" rel="noopener noreferrer">
+      <a className="embed-attribution" href="/" target="_blank" rel="noopener noreferrer">
         aitime-calc
       </a>
     </div>
