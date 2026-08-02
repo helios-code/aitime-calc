@@ -573,3 +573,138 @@
     text-align: left;
   }
 }
+
+/* methodology full link (from inline explainer) */
+.methodology-full-link {
+  align-self: flex-start;
+  color: var(--accent-2);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.methodology-full-link:hover {
+  text-decoration: underline;
+}
+
+/* methodology page */
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.methodology-back {
+  align-self: flex-start;
+  color: var(--accent-2);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.methodology-back:hover {
+  text-decoration: underline;
+}
+
+.methodology-title {
+  font-size: 32px;
+}
+
+.methodology-page-body {
+  gap: 40px;
+}
+
+.methodology-page-body section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.methodology-page-body h2 {
+  font-size: 22px;
+}
+
+.methodology-page-body p,
+.methodology-page-body li {
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.methodology-page-body ul {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.methodology-source-note {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 14px 18px;
+  font-size: 14px;
+}
+
+.methodology-formula {
+  margin: 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-alt);
+  padding: 16px 20px;
+}
+
+.methodology-formula code {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 14px;
+  color: var(--text-h);
+  white-space: pre;
+}
+
+.methodology-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.methodology-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.methodology-table th,
+.methodology-table td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.methodology-table th {
+  color: var(--text-h);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--surface);
+}
+
+.methodology-table td:last-child {
+  font-family: var(--mono);
+  color: var(--text-h);
+}
+
+.methodology-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.methodology-page-body p.methodology-bottom-line {
+  color: var(--text-h);
+  font-size: 17px;
+}
