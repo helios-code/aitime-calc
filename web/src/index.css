@@ -14,8 +14,8 @@
   --accent-btn: var(--accent);
   --accent-2-btn: var(--accent-2);
   --danger-cool: #3a3f55;
-  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas, 'Liberation Mono', monospace;
 
   font: 18px/1.5 var(--sans);
   color-scheme: light dark;

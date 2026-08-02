@@ -7,11 +7,15 @@
    cross-cutting a11y rules (focus-visible, reduced-motion).
    ============================================================ */
 
-/* Real webfonts for the --sans / --mono stacks declared in index.css.
-   Previously undeclared, so every render silently fell back to the
-   OS system font — this is what actually ships the "developer tool,
-   precision, mono-accent" identity the brand mark implies. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+/* Font stack: intentionally system-only, zero network fetch. index.css
+   previously named 'Inter' / 'JetBrains Mono' as the first choice but
+   never loaded either webfont anywhere, so every render silently fell
+   back past them anyway. Rather than add a render-blocking third-party
+   font chain (fonts.googleapis.com -> fonts.gstatic.com) that costs LCP
+   and a GEO/privacy hit, --sans/--mono in index.css now name a strong
+   native stack directly — ui-monospace already resolves to a
+   precision-grade mono (SF Mono / Cascadia Code / Roboto Mono) on every
+   major platform, no download needed. */
 
 :root {
   /* type ramp — values match what the app already renders at;
