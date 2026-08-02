@@ -59,4 +59,12 @@ describe('buildOgImageUrl', () => {
     const url = buildOgImageUrl(new URLSearchParams('tool=gpt-4o'))
     expect(url).toBe('https://aitime-calc-api.fly.dev/api/og?tool=gpt-4o')
   })
+
+  it('returns null when tool is absent, even with VITE_API_URL set', () => {
+    // /api/og 400s without a tool id -- must not inject a broken og:image
+    // that would duplicate/shadow the correct static default in index.html.
+    process.env.VITE_API_URL = 'https://aitime-calc-api.fly.dev'
+    expect(buildOgImageUrl(new URLSearchParams())).toBeNull()
+    expect(buildOgImageUrl(new URLSearchParams('model=accelerating'))).toBeNull()
+  })
 })

@@ -73,11 +73,16 @@ export function buildOgImageUrl(searchParams: URLSearchParams): string | null {
   const apiOrigin = process.env.VITE_API_URL
   if (!apiOrigin) return null
 
-  const url = new URL('/api/og', apiOrigin)
+  // /api/og 400s without a tool id -- omit the tag entirely rather than inject
+  // a broken image URL that would duplicate (and could shadow) the correct
+  // static default og:image already in index.html for the bare landing.
   const tool = searchParams.get('tool')
+  if (!tool) return null
+
+  const url = new URL('/api/og', apiOrigin)
   const model = searchParams.get('model')
   const date = searchParams.get('date')
-  if (tool) url.searchParams.set('tool', tool)
+  url.searchParams.set('tool', tool)
   if (model) url.searchParams.set('model', model)
   if (date) url.searchParams.set('date', date)
   return url.toString()
