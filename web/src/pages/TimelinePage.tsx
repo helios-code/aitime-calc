@@ -68,7 +68,7 @@ export function TimelinePage() {
         <svg
           className="timeline-chart"
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          role="img"
+          role="group"
           aria-label="Human-equivalent years compressed since each tool's release, plotted against release date. Older releases show more compressed human-equivalent time."
         >
           <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
@@ -87,13 +87,14 @@ export function TimelinePage() {
               </text>
             ))}
 
-            <line className="timeline-axis" x1={0} y1={PLOT_H} x2={PLOT_W} y2={PLOT_H} />
-            <line className="timeline-axis" x1={0} y1={0} x2={0} y2={PLOT_H} />
+            <line className="timeline-axis" x1={0} y1={PLOT_H} x2={PLOT_W} y2={PLOT_H} aria-hidden="true" />
+            <line className="timeline-axis" x1={0} y1={0} x2={0} y2={PLOT_H} aria-hidden="true" />
 
             {points.length > 1 && (
               <path
                 className="timeline-curve"
                 d={points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(p.releaseMs)} ${scaleY(p.humanEquivYears)}`).join(' ')}
+                aria-hidden="true"
               />
             )}
 
