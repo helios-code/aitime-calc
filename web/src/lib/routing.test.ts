@@ -18,4 +18,12 @@ describe('getRoute', () => {
     expect(getRoute('/methodology-typo')).toBe('home')
     expect(getRoute('/other')).toBe('home')
   })
+
+  it('matches /leaderboard', () => {
+    expect(getRoute('/leaderboard')).toBe('leaderboard')
+  })
+
+  it('matches /leaderboard/ with trailing slash', () => {
+    expect(getRoute('/leaderboard/')).toBe('leaderboard')
+  })
 })
