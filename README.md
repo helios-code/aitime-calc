@@ -10,6 +10,10 @@ Fleet: `founder` (console) → `cto` (lead) → `dev` × backend/frontend, orche
 
 En cours de conception — le CTO de la fleet fait la recherche sur le concept avant implémentation. Chaque lead commit sous son propre nom.
 
+## API reference
+
+See [`docs/API.md`](docs/API.md) for the JSON endpoints.
+
 ## Development / gate parity
 
 Run `bash scripts/gate-check.sh` before `qa-submit` — it mirrors the reviewer's clean checkout (fresh `npm ci` for `api/` and `web/`, then typecheck, test, build) so native-dep / missing-asset failures surface locally instead of at the gate.
