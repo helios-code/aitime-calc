@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
-import { TOOLS } from "./dataset.js";
+import { findTool, TOOLS } from "./dataset.js";
 import {
   computeAtem,
   DEFAULT_PARAMS,
@@ -144,7 +144,7 @@ export function buildOgSvg(q: OgQuery): string {
     }
     return buildDateModeOgSvg(q.date, q.model);
   }
-  const tool = TOOLS.find((t) => t.id === toolId);
+  const tool = findTool(toolId);
   if (!tool) {
     throw { status: 400, error: `unknown tool: ${toolId}` };
   }
@@ -203,7 +203,7 @@ function buildCalcResponse(q: CalcQuery) {
   let releaseStr = q.release ?? q.release_date;
 
   if (toolId) {
-    const tool = TOOLS.find((t) => t.id === toolId);
+    const tool = findTool(toolId);
     if (!tool) {
       throw { status: 400, error: `unknown tool_id: ${toolId}` };
     }

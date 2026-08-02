@@ -80,6 +80,18 @@ describe('parseInitialState', () => {
     expect(state.date).toBeNull()
   })
 
+  it('resolves an old pre-reconciliation tool id to its canonical id', () => {
+    // FALLBACK_TOOLS used to ship 'cursor-yolo'; the api canonical dataset
+    // uses 'cursor-yolo-mode'. Old shared links must still resolve.
+    const state = parseInitialState('?tool=cursor-yolo')
+    expect(state.tool).toBe('cursor-yolo-mode')
+  })
+
+  it('leaves an id with no known alias untouched', () => {
+    const state = parseInitialState('?tool=claude-sonnet-4-5')
+    expect(state.tool).toBe('claude-sonnet-4-5')
+  })
+
   it('prefers tool mode when both tool and date are present', () => {
     const state = parseInitialState('?tool=gpt-4&date=2022-11-30')
     expect(state.mode).toBe('tool')

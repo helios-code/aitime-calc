@@ -10,6 +10,15 @@ export interface AiTool {
 
 export const TOOLS: AiTool[] = [
   {
+    id: "gpt-2",
+    name: "GPT-2",
+    vendor: "OpenAI",
+    release_date: "2019-02-14",
+    category: "llm",
+    note: "First widely-noted \"too dangerous to release\" language model.",
+    sources: ["OpenAI blog announcement, February 2019"],
+  },
+  {
     id: "github-copilot-preview",
     name: "GitHub Copilot (Technical Preview)",
     vendor: "GitHub / OpenAI",
@@ -62,6 +71,24 @@ export const TOOLS: AiTool[] = [
     category: "llm",
     note: "Claude 2 general-availability launch.",
     sources: ["Anthropic blog announcement, July 2023"],
+  },
+  {
+    id: "gpt-4-turbo",
+    name: "GPT-4 Turbo",
+    vendor: "OpenAI",
+    release_date: "2023-11-06",
+    category: "llm",
+    note: "128k context, cheaper, more current knowledge than launch GPT-4.",
+    sources: ["OpenAI blog announcement, November 2023"],
+  },
+  {
+    id: "gemini-1-0",
+    name: "Gemini 1.0",
+    vendor: "Google DeepMind",
+    release_date: "2023-12-06",
+    category: "llm",
+    note: "Google's first natively multimodal model family.",
+    sources: ["Google blog announcement, December 2023"],
   },
   {
     id: "claude-3",
@@ -432,4 +459,39 @@ export const TOOLS: AiTool[] = [
     note: "Claude Sonnet 4.5 launch, marketed as the best coding model at release.",
     sources: ["Anthropic blog announcement, September 2025"],
   },
+  {
+    id: "gemini-3",
+    name: "Gemini 3",
+    vendor: "Google DeepMind",
+    release_date: "2025-11-18",
+    category: "reasoning-llm",
+    note: "Next-generation multimodal reasoning model family.",
+    sources: ["Google blog announcement, November 2025"],
+  },
 ];
+
+// Old ids the web fallback dataset (web/src/data/tools.ts) shipped before it was
+// reconciled to this canonical id space. Shared links/embeds built against those
+// ids must keep resolving, so lookups go through resolveToolId/findTool rather
+// than a raw TOOLS.find on the caller-supplied id.
+export const TOOL_ID_ALIASES: Record<string, string> = {
+  "gpt-3": "gpt-3-api",
+  "github-copilot": "github-copilot-preview",
+  "claude-3.5-sonnet": "claude-3-5-sonnet",
+  "o1": "openai-o1",
+  "cursor-yolo": "cursor-yolo-mode",
+  "claude-3.7-sonnet": "claude-3-7-sonnet",
+  "gpt-4.5": "openai-gpt-4-5",
+  "gemini-1": "gemini-1-0",
+  "gemini-2.5-pro": "gemini-2-5-pro",
+  "claude-4-opus": "claude-opus-4",
+  "claude-4.5-sonnet": "claude-sonnet-4-5",
+};
+
+export function resolveToolId(id: string): string {
+  return TOOL_ID_ALIASES[id] ?? id;
+}
+
+export function findTool(id: string): AiTool | undefined {
+  return TOOLS.find((t) => t.id === resolveToolId(id));
+}
