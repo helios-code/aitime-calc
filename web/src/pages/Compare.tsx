@@ -64,6 +64,7 @@ function ResultColumn({
                 <dd>{side.result.ai_doublings.toFixed(1)}</dd>
               </div>
             </dl>
+            <SourceBadge source={side.source} label="Calc" />
           </>
         ) : (
           <div className="cmp-skeleton" />
