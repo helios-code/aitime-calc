@@ -105,12 +105,11 @@ back-of-envelope heuristic, not a benchmark:
   doesn't measure any actual benchmark score doubling — it treats a fixed
   cadence (or the accelerating interpolation) as a stand-in for capability
   growth. Treat the output as an illustrative multiplier, not a citation.
-- **The accelerating model's D_ai interpolation ignores the `dAiMonths`
-  parameter entirely.** `acceleratingDoublings()` uses hardcoded anchors
-  (7 months at 2019-01-01 → 4 months at `asOf`) and never reads
-  `params.dAiMonths`. Setting `d_ai_months` on an accelerating-model request
-  changes nothing about the result — it only affects the base model. This is
-  a real inconsistency in the current code, not a documentation choice.
+- **The accelerating model's D_ai interpolation anchors on `dAiMonths`.**
+  `acceleratingDoublings()` interpolates from 7 months (2019-01-01) down to
+  `params.dAiMonths` at `asOf`. Setting `d_ai_months` on an accelerating-model
+  request changes the "now" end of the curve, same as it does for the base
+  model.
 - **The accelerating interpolation is relative to `asOf`, not to the actual
   current date.** The "4 months" anchor always lands exactly at whatever
   `asOf` you pass, even if `asOf` is in the past — so accelerating-model
