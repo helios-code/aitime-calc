@@ -57,8 +57,8 @@ i.e. count how many AI doublings happened, then say each one "is worth"
 integration: it walks from `release` to `asOf` in 400 steps and sums
 `Δmonths / D_ai(t)` at each step (trapezoidal rule), where `D_ai(t)`
 linearly interpolates from **7 months** (anchored at 2019-01-01) down to
-**4 months** (anchored at `asOf`, i.e. "now" for that calculation). The
-result is still turned into years the same way:
+**`dAiMonths`** (default 4.5, anchored at `asOf`, i.e. "now" for that
+calculation). The result is still turned into years the same way:
 
 ```
 humanEquivYears = aiDoublings * dClassicMonths / 12
@@ -87,11 +87,10 @@ classic-cadence software progress would have — about 4.8 AI-capability
 doublings, each counted as worth 6 years of classic progress.
 
 The same release/as-of pair under the accelerating model would report a
-*higher* `aiDoublings` for the earlier portion of that span, because
-`D_ai(t)` back in 2023 is interpolated closer to 7 months (slower) — actually
-lower doublings for that portion — than the 4-month rate near `asOf`; recent
-months dominate. Run it against `/api/calc` to see the exact number for any
-date.
+*lower* `aiDoublings` for the earlier portion of that span, because
+`D_ai(t)` back in 2023 is interpolated closer to 7 months (slower) than the
+default 4.5-month rate near `asOf`; recent months dominate. Run it against
+`/api/calc` to see the exact number for any date.
 
 ## Assumptions and limitations
 
