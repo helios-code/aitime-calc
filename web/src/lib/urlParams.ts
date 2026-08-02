@@ -1,4 +1,5 @@
 import type { CalcModel } from '../types'
+import { resolveToolId } from '../data/tools'
 
 export function isValidDateStr(s: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false
@@ -27,7 +28,7 @@ export function parseInitialState(search: string): InitialState {
   const params = new URLSearchParams(search)
 
   const rawTool = params.get('tool')
-  const tool = rawTool && isPlausibleToolId(rawTool) ? rawTool : null
+  const tool = rawTool && isPlausibleToolId(rawTool) ? resolveToolId(rawTool) : null
 
   const rawDate = params.get('date')
   const date = rawDate && isValidDateStr(rawDate) ? rawDate : null
