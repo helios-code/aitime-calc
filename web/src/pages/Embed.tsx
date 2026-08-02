@@ -6,6 +6,7 @@ import { parseInitialState } from '../lib/urlParams'
 import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from '../data/tools'
 import type { CalcResult, Tool } from '../types'
 import { ResultHero } from '../components/ResultHero'
+import { SourceBadge } from '../components/SourceBadge'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -19,6 +20,7 @@ export default function Embed() {
   const [tools, setTools] = useState<Tool[]>(FALLBACK_TOOLS)
   const [selectedToolId, setSelectedToolId] = useState(initial.tool ?? DEFAULT_TOOL_ID)
   const [result, setResult] = useState<CalcResult | null>(null)
+  const [source, setSource] = useState<'live' | 'mock'>('mock')
 
   useEffect(() => {
     let cancelled = false
@@ -38,9 +40,10 @@ export default function Embed() {
   useEffect(() => {
     if (!releaseDate) return
     let cancelled = false
-    fetchCalc({ release_date: releaseDate, as_of: TODAY, model: initial.model }).then(({ result }) => {
+    fetchCalc({ release_date: releaseDate, as_of: TODAY, model: initial.model }).then(({ result, source }) => {
       if (cancelled) return
       setResult(result)
+      setSource(source)
     })
     return () => {
       cancelled = true
@@ -50,7 +53,10 @@ export default function Embed() {
   return (
     <div className="embed-page">
       {result ? (
-        <ResultHero result={result} toolName={selectedTool?.name} />
+        <>
+          <ResultHero result={result} toolName={selectedTool?.name} />
+          <SourceBadge source={source} label="Calc" />
+        </>
       ) : (
         <div className="result-skeleton embed-skeleton" aria-hidden="true" />
       )}
