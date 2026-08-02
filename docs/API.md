@@ -107,7 +107,7 @@ Renders a `1200×630` PNG social-share card (OpenGraph image). Two modes:
 GET /api/og?tool=cursor-yolo-mode&date=2026-07-30
 ```
 
-**Date mode** — no `tool`, just `&date=<YYYY-MM-DD>` (+ optional `&model=`). Renders a card for "as of `date`" without a tool name/vendor line — used for date-only shares.
+**Date mode** — no `tool`, just `&date=<YYYY-MM-DD>` (+ optional `&model=`). Here `date` is the *release/reference* date (`as_of` is implicitly today, not overridable) — the inverse of tool mode's `date`. Renders a card for "today, `date` months/years in" without a tool name/vendor line — used for date-only shares. Errors if `date` is in the future.
 
 ```
 GET /api/og?date=2025-03-14
