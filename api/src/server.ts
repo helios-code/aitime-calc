@@ -190,12 +190,19 @@ export function buildOgSvg(q: OgQuery): string {
 // blank PNG.
 export function renderOgPixels(q: OgQuery) {
   const svg = buildOgSvg(q);
-  return new Resvg(svg, {
+  const resvg = new Resvg(svg, {
     font: {
       fontBuffers: OG_FONT_BUFFERS,
       defaultFontFamily: OG_FONT_FAMILY,
     },
-  }).render();
+  });
+  try {
+    return resvg.render();
+  } finally {
+    // The Resvg tree is no longer needed once rendered; the returned RenderedImage
+    // owns its own wasm memory and is freed by the caller after reading it.
+    resvg.free();
+  }
 }
 
 function buildCalcResponse(q: CalcQuery) {
@@ -278,7 +285,13 @@ export function buildServer() {
 
   app.get<{ Querystring: OgQuery }>("/api/og", async (req, reply) => {
     try {
-      const png = renderOgPixels(req.query).asPng();
+      const img = renderOgPixels(req.query);
+      let png: Uint8Array;
+      try {
+        png = img.asPng();
+      } finally {
+        img.free();
+      }
       reply.header("Content-Type", "image/png");
       return png;
     } catch (err: any) {
