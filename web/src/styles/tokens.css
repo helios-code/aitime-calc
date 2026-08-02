@@ -1,0 +1,114 @@
+/* ============================================================
+   aitime-calc design tokens
+   Layer 0: imported once, globally, before any component CSS.
+   Color tokens (--bg, --surface, --accent, ...) stay defined in
+   index.css — this file adds the layers that were missing:
+   type ramp, spacing scale, radii, shadows, motion, and the
+   cross-cutting a11y rules (focus-visible, reduced-motion).
+   ============================================================ */
+
+/* Font stack: intentionally system-only, zero network fetch. index.css
+   previously named 'Inter' / 'JetBrains Mono' as the first choice but
+   never loaded either webfont anywhere, so every render silently fell
+   back past them anyway. Rather than add a render-blocking third-party
+   font chain (fonts.googleapis.com -> fonts.gstatic.com) that costs LCP
+   and a GEO/privacy hit, --sans/--mono in index.css now name a strong
+   native stack directly — ui-monospace already resolves to a
+   precision-grade mono (SF Mono / Cascadia Code / Roboto Mono) on every
+   major platform, no download needed. */
+
+:root {
+  /* type ramp — values match what the app already renders at;
+     naming them turns "15px here, 16px there" into an intentional scale */
+  --text-3xs: 11px;
+  --text-2xs: 12px;
+  --text-xs: 13px;
+  --text-sm: 14px;
+  --text-md: 15px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 22px;
+  --text-3xl: 32px;
+  --text-display: clamp(64px, 14vw, 128px);
+
+  /* spacing scale — 4px grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* elevation — dark-theme default (low, cool shadows read as depth
+     without a light source; kept subtle so cards don't look like
+     generic-AI drop-shadow cards) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.35);
+
+  /* motion — one shared rhythm for every transition/animation */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 400ms;
+  --duration-reveal: 900ms;
+
+  /* focus ring — reused by the global :focus-visible rule below and by
+     any component that needs to draw its own ring (e.g. inset controls) */
+  --focus-ring-color: var(--accent-2);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--focus-ring-color) 45%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    /* same elevation scale, lighter touch — a dark-mode shadow recipe
+       reused verbatim on white reads as dirty smudges, not depth */
+    --shadow-sm: 0 1px 2px rgba(23, 26, 38, 0.06);
+    --shadow-md: 0 8px 24px rgba(23, 26, 38, 0.08);
+    --shadow-lg: 0 16px 40px rgba(23, 26, 38, 0.12);
+  }
+}
+
+/* keyboard focus — WCAG 2.2 AA visible-focus, missing everywhere before
+   this (hover-only color changes are not a focus indicator). Mouse/touch
+   clicks don't get the ring; only real keyboard/AT focus does. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* prefers-reduced-motion: collapse every animation/transition to a single
+   frame instead of stripping them — elements that rely on an animation's
+   *end state* (e.g. opacity:0 -> 1 "forwards" reveals) still land correctly,
+   they just stop moving. Infinite loops (skeleton sweep) also stop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* numeric data (results, table figures, param values) should not jiggle
+   horizontally as digits change — tabular figures keep every column aligned */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
