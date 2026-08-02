@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isPlausibleToolId, isValidDateStr, parseInitialState } from './urlParams'
+import { isPlausibleToolId, isValidDateStr, parseCompareState, parseInitialState } from './urlParams'
 
 describe('isValidDateStr', () => {
   it('accepts a real calendar date', () => {
@@ -101,5 +101,26 @@ describe('parseInitialState', () => {
     expect(parseInitialState('').model).toBe('base')
     expect(parseInitialState('?model=accelerating').model).toBe('accelerating')
     expect(parseInitialState('?model=bogus').model).toBe('base')
+  })
+})
+
+describe('parseCompareState', () => {
+  it('reads ?tool= as side a and ?vs= as side b', () => {
+    const state = parseCompareState('?tool=gpt-4&vs=claude-3')
+    expect(state.a).toBe('gpt-4')
+    expect(state.b).toBe('claude-3')
+  })
+
+  it('treats a missing ?vs= as absent', () => {
+    expect(parseCompareState('?tool=gpt-4').b).toBeNull()
+  })
+
+  it('rejects a syntactically invalid ?vs=', () => {
+    expect(parseCompareState('?vs=%3Cscript%3E').b).toBeNull()
+  })
+
+  it('defaults model to base unless explicitly accelerating', () => {
+    expect(parseCompareState('').model).toBe('base')
+    expect(parseCompareState('?model=accelerating').model).toBe('accelerating')
   })
 })

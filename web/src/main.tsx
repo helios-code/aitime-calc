@@ -6,6 +6,7 @@ import App from './App.tsx'
 import { MethodologyPage } from './pages/MethodologyPage.tsx'
 import Leaderboard from './pages/Leaderboard.tsx'
 import { TimelinePage } from './pages/TimelinePage.tsx'
+import Compare from './pages/Compare.tsx'
 import { getRoute, type Route } from './lib/routing.ts'
 
 const ROUTE_COMPONENTS: Record<Route, ComponentType> = {
@@ -13,6 +14,7 @@ const ROUTE_COMPONENTS: Record<Route, ComponentType> = {
   methodology: MethodologyPage,
   leaderboard: Leaderboard,
   timeline: TimelinePage,
+  compare: Compare,
 }
 
 const route = getRoute(window.location.pathname)
