@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { fetchCalc, fetchTools } from './lib/api'
 import { buildEmbedSnippet } from './lib/embed'
-import { parseInitialState } from './lib/urlParams'
+import { DEFAULT_D_AI_MONTHS, DEFAULT_D_CLASSIC_MONTHS, parseInitialState } from './lib/urlParams'
 import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from './data/tools'
 import type { CalcModel, CalcResult, Tool } from './types'
 import { ModeTabs } from './components/ModeTabs'
 import { ToolPicker } from './components/ToolPicker'
 import { DatePicker } from './components/DatePicker'
 import { ModelToggle } from './components/ModelToggle'
+import { AdvancedParams } from './components/AdvancedParams'
 import { ResultHero } from './components/ResultHero'
 import { ShareCard } from './components/ShareCard'
 import { MethodologyExplainer } from './components/MethodologyExplainer'
@@ -25,6 +26,8 @@ function App() {
   const [selectedToolId, setSelectedToolId] = useState(initial.tool ?? DEFAULT_TOOL_ID)
   const [customDate, setCustomDate] = useState(initial.date ?? '2022-11-30')
   const [model, setModel] = useState<CalcModel>(initial.model)
+  const [dAiMonths, setDAiMonths] = useState(initial.dAiMonths ?? DEFAULT_D_AI_MONTHS)
+  const [dClassicMonths, setDClassicMonths] = useState(initial.dClassicMonths ?? DEFAULT_D_CLASSIC_MONTHS)
   const [result, setResult] = useState<CalcResult | null>(null)
   const [calcSource, setCalcSource] = useState<'live' | 'mock'>('mock')
   const [loading, setLoading] = useState(true)
@@ -61,8 +64,10 @@ function App() {
       url.searchParams.set('date', customDate)
     }
     url.searchParams.set('model', model)
+    if (dAiMonths !== DEFAULT_D_AI_MONTHS) url.searchParams.set('d_ai_months', String(dAiMonths))
+    if (dClassicMonths !== DEFAULT_D_CLASSIC_MONTHS) url.searchParams.set('d_classic_months', String(dClassicMonths))
     return url.toString()
-  }, [mode, selectedToolId, customDate, model])
+  }, [mode, selectedToolId, customDate, model, dAiMonths, dClassicMonths])
 
   // /embed reads the same ?tool= / ?date= contract as this page, so the embed
   // action follows whichever mode is active.
@@ -80,7 +85,13 @@ function App() {
     if (!releaseDate) return
     let cancelled = false
     setLoading(true)
-    fetchCalc({ release_date: releaseDate, as_of: TODAY, model }).then(({ result, source }) => {
+    fetchCalc({
+      release_date: releaseDate,
+      as_of: TODAY,
+      model,
+      d_ai_months: dAiMonths,
+      d_classic_months: dClassicMonths,
+    }).then(({ result, source }) => {
       if (cancelled) return
       setResult(result)
       setCalcSource(source)
@@ -89,7 +100,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [releaseDate, model])
+  }, [releaseDate, model, dAiMonths, dClassicMonths])
 
   return (
     <div className="app">
@@ -110,6 +121,12 @@ function App() {
             <DatePicker value={customDate} onChange={setCustomDate} />
           )}
           <ModelToggle model={model} onChange={setModel} />
+          <AdvancedParams
+            dAiMonths={dAiMonths}
+            dClassicMonths={dClassicMonths}
+            onChangeDAiMonths={setDAiMonths}
+            onChangeDClassicMonths={setDClassicMonths}
+          />
         </section>
 
         <section className={loading ? 'result-panel result-panel--loading' : 'result-panel'}>
