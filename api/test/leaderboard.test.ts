@@ -36,12 +36,25 @@ describe("buildLeaderboardResponse", () => {
 
   it("accepts as_of and reproduces the same ranking deterministically", () => {
     const board = buildLeaderboardResponse({ as_of: "2025-01-01" });
-    expect(board.length).toBe(TOOLS.length);
     expect(buildLeaderboardResponse({ as_of: "2025-01-01" })).toEqual(board);
   });
 
   it("400s on an invalid as_of date", () => {
     expect(() => buildLeaderboardResponse({ as_of: "not-a-date" })).toThrow();
+  });
+
+  it("excludes tools not yet released as of as_of, never returning negative human_equiv_years", () => {
+    const asOf = "2025-01-01";
+    const board = buildLeaderboardResponse({ as_of: asOf });
+    for (const entry of board) {
+      expect(entry.release_date <= asOf).toBe(true);
+      expect(entry.human_equiv_years).toBeGreaterThanOrEqual(0);
+    }
+    const unreleased = TOOLS.filter((t) => t.release_date > asOf);
+    expect(unreleased.length).toBeGreaterThan(0);
+    for (const tool of unreleased) {
+      expect(board.find((e) => e.tool_id === tool.id)).toBeUndefined();
+    }
   });
 });
 

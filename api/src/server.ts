@@ -433,16 +433,17 @@ export function buildLeaderboardResponse(q: LeaderboardQuery): LeaderboardEntry[
     throw { status: 400, error: `invalid as_of date: ${asOfStr}` };
   }
 
-  return TOOLS.map((tool) => {
-    const release = new Date(`${tool.release_date}T00:00:00Z`);
-    const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
-    return {
-      tool_id: tool.id,
-      name: tool.name,
-      human_equiv_years: Number(result.humanEquivYears.toFixed(2)),
-      release_date: tool.release_date,
-    };
-  })
+  return TOOLS.map((tool) => ({ tool, release: new Date(`${tool.release_date}T00:00:00Z`) }))
+    .filter(({ release }) => release.getTime() <= asOf.getTime())
+    .map(({ tool, release }) => {
+      const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
+      return {
+        tool_id: tool.id,
+        name: tool.name,
+        human_equiv_years: Number(result.humanEquivYears.toFixed(2)),
+        release_date: tool.release_date,
+      };
+    })
     .sort((a, b) => b.human_equiv_years - a.human_equiv_years)
     .map((entry, i) => ({ rank: i + 1, ...entry }));
 }
