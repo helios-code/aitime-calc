@@ -29,13 +29,23 @@ function useDocumentTitle(title: string) {
   }, [title])
 }
 
-function ResultColumn({ tools, side, onChange }: { tools: Tool[]; side: Side; onChange: (id: string) => void }) {
-  const tool = tools.find((t) => t.id === side.toolId)
+function ResultColumn({
+  tools,
+  selectedId,
+  side,
+  onChange,
+}: {
+  tools: Tool[]
+  selectedId: string
+  side: Side
+  onChange: (id: string) => void
+}) {
+  const tool = tools.find((t) => t.id === selectedId)
   return (
     <div className="cmp-col">
-      <ToolPicker tools={tools} selectedId={side.toolId} onChange={onChange} />
+      <ToolPicker tools={tools} selectedId={selectedId} onChange={onChange} />
       <div className="cmp-result">
-        {side.result ? (
+        {side.result && side.toolId === selectedId ? (
           <>
             <div className="cmp-figure">{side.result.human_equiv_years.toFixed(1)}</div>
             <div className="cmp-unit">human-equiv years</div>
@@ -141,11 +151,11 @@ export default function Compare() {
 
       <main className="app-main">
         <div className="cmp-columns">
-          <ResultColumn tools={tools} side={resultA} onChange={setIdA} />
+          <ResultColumn tools={tools} selectedId={idA} side={resultA} onChange={setIdA} />
           <div className="cmp-vs" aria-hidden="true">
             vs
           </div>
-          <ResultColumn tools={tools} side={resultB} onChange={setIdB} />
+          <ResultColumn tools={tools} selectedId={idB} side={resultB} onChange={setIdB} />
         </div>
 
         {delta !== null && (
