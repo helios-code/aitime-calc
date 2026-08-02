@@ -7,7 +7,7 @@ describe('buildEmbedSnippet', () => {
     expect(snippet).toContain('<iframe')
     expect(snippet).toContain('src="https://aitime-calc.example/embed?tool=gpt-4o&model=base"')
     expect(snippet).toContain('width="480"')
-    expect(snippet).toContain('height="360"')
+    expect(snippet).toContain('height="600"')
   })
 
   it('carries the accelerating model through', () => {
