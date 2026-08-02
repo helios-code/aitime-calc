@@ -1,0 +1,33 @@
+.embed-page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.embed-page .result-hero {
+  width: 100%;
+  padding: 24px 20px;
+}
+
+.embed-skeleton {
+  width: 100%;
+  min-height: 220px;
+}
+
+.embed-attribution {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.embed-attribution:hover,
+.embed-attribution:focus-visible {
+  color: var(--accent-2);
+}
