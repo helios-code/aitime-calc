@@ -44,7 +44,7 @@ Returns the full curated tool dataset (`api/src/dataset.ts`), the canonical id s
 | `name` | string | display name |
 | `vendor` | string | |
 | `release_date` | string | `YYYY-MM-DD` |
-| `category` | string | free-form, e.g. `llm`, `coding agent`, `image gen` |
+| `category` | string | e.g. `llm`, `reasoning-llm`, `agentic-coding`, `code-generation`, `code-completion`, `chat`, `multimodal-llm`, `open-weight-llm`, `browser-agent`, `image-gen`, `video-gen`, `science-ai` (kebab-case; see `api/src/dataset.ts` for the current full set) |
 | `note` | string | one-line description |
 | `sources` | string[] | optional, citation(s) for `release_date` |
 
