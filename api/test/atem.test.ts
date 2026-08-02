@@ -61,4 +61,20 @@ describe("ATEM accelerating model", () => {
     // releases, so fewer doublings accrue per elapsed month than the flat base rate.
     expect(accel.aiDoublings).toBeLessThan(base.aiDoublings);
   });
+
+  it("honors a non-default d_ai_months (regression: was hardcoded, param was a silent no-op)", () => {
+    const release = new Date("2024-01-01T00:00:00Z");
+    const asOf = new Date("2026-07-30T00:00:00Z");
+
+    const defaultAccel = computeAtem(release, asOf, "accelerating", DEFAULT_PARAMS);
+    const fasterAccel = computeAtem(release, asOf, "accelerating", {
+      ...DEFAULT_PARAMS,
+      dAiMonths: 2,
+    });
+
+    // A shorter current-day doubling time should yield strictly more doublings
+    // (and more human-equivalent years), proving the param actually flows through.
+    expect(fasterAccel.aiDoublings).toBeGreaterThan(defaultAccel.aiDoublings);
+    expect(fasterAccel.humanEquivYears).toBeGreaterThan(defaultAccel.humanEquivYears);
+  });
 });
