@@ -5,12 +5,14 @@ import './index.css'
 import App from './App.tsx'
 import { MethodologyPage } from './pages/MethodologyPage.tsx'
 import Leaderboard from './pages/Leaderboard.tsx'
+import Compare from './pages/Compare.tsx'
 import { getRoute, type Route } from './lib/routing.ts'
 
 const ROUTE_COMPONENTS: Record<Route, ComponentType> = {
   home: App,
   methodology: MethodologyPage,
   leaderboard: Leaderboard,
+  compare: Compare,
 }
 
 const route = getRoute(window.location.pathname)

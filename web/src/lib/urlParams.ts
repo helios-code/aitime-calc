@@ -38,3 +38,26 @@ export function parseInitialState(search: string): InitialState {
 
   return { tool, date, model, mode }
 }
+
+export interface CompareState {
+  a: string | null
+  b: string | null
+  model: CalcModel
+}
+
+// Compare mode reads its own pair of params (?tool=a&vs=b) — kept separate from
+// parseInitialState so the single-tool permalink contract (?tool=/?date=/?model=)
+// is untouched.
+export function parseCompareState(search: string): CompareState {
+  const params = new URLSearchParams(search)
+
+  const rawA = params.get('tool')
+  const a = rawA && isPlausibleToolId(rawA) ? rawA : null
+
+  const rawB = params.get('vs')
+  const b = rawB && isPlausibleToolId(rawB) ? rawB : null
+
+  const model: CalcModel = params.get('model') === 'accelerating' ? 'accelerating' : 'base'
+
+  return { a, b, model }
+}
