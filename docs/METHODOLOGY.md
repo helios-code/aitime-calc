@@ -57,8 +57,8 @@ i.e. count how many AI doublings happened, then say each one "is worth"
 integration: it walks from `release` to `asOf` in 400 steps and sums
 `Δmonths / D_ai(t)` at each step (trapezoidal rule), where `D_ai(t)`
 linearly interpolates from **7 months** (anchored at 2019-01-01) down to
-**4 months** (anchored at `asOf`, i.e. "now" for that calculation). The
-result is still turned into years the same way:
+**`dAiMonths`** (default 4.5, anchored at `asOf`, i.e. "now" for that
+calculation). The result is still turned into years the same way:
 
 ```
 humanEquivYears = aiDoublings * dClassicMonths / 12
@@ -87,11 +87,10 @@ classic-cadence software progress would have — about 4.8 AI-capability
 doublings, each counted as worth 6 years of classic progress.
 
 The same release/as-of pair under the accelerating model would report a
-*higher* `aiDoublings` for the earlier portion of that span, because
-`D_ai(t)` back in 2023 is interpolated closer to 7 months (slower) — actually
-lower doublings for that portion — than the 4-month rate near `asOf`; recent
-months dominate. Run it against `/api/calc` to see the exact number for any
-date.
+*lower* `aiDoublings` for the earlier portion of that span, because
+`D_ai(t)` back in 2023 is interpolated closer to 7 months (slower) than the
+default 4.5-month rate near `asOf`; recent months dominate. Run it against
+`/api/calc` to see the exact number for any date.
 
 ## Assumptions and limitations
 
@@ -105,12 +104,11 @@ back-of-envelope heuristic, not a benchmark:
   doesn't measure any actual benchmark score doubling — it treats a fixed
   cadence (or the accelerating interpolation) as a stand-in for capability
   growth. Treat the output as an illustrative multiplier, not a citation.
-- **The accelerating model's D_ai interpolation ignores the `dAiMonths`
-  parameter entirely.** `acceleratingDoublings()` uses hardcoded anchors
-  (7 months at 2019-01-01 → 4 months at `asOf`) and never reads
-  `params.dAiMonths`. Setting `d_ai_months` on an accelerating-model request
-  changes nothing about the result — it only affects the base model. This is
-  a real inconsistency in the current code, not a documentation choice.
+- **The accelerating model's D_ai interpolation anchors on `dAiMonths`.**
+  `acceleratingDoublings()` interpolates from 7 months (2019-01-01) down to
+  `params.dAiMonths` at `asOf`. Setting `d_ai_months` on an accelerating-model
+  request changes the "now" end of the curve, same as it does for the base
+  model.
 - **The accelerating interpolation is relative to `asOf`, not to the actual
   current date.** The "4 months" anchor always lands exactly at whatever
   `asOf` you pass, even if `asOf` is in the past — so accelerating-model
