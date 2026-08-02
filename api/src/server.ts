@@ -57,6 +57,7 @@ interface CompareQuery extends AtemQuery {
 
 interface LeaderboardQuery {
   model?: string;
+  as_of?: string;
 }
 
 interface LeaderboardEntry {
@@ -425,7 +426,12 @@ export function buildLeaderboardResponse(q: LeaderboardQuery): LeaderboardEntry[
     throw { status: 400, error: `unknown model: ${q.model}` };
   }
   const model: CalcModel = q.model === "accelerating" ? "accelerating" : "base";
-  const asOf = new Date();
+
+  const asOfStr = q.as_of ?? new Date().toISOString().slice(0, 10);
+  const asOf = new Date(`${asOfStr}T00:00:00Z`);
+  if (!isValidDate(asOf)) {
+    throw { status: 400, error: `invalid as_of date: ${asOfStr}` };
+  }
 
   return TOOLS.map((tool) => {
     const release = new Date(`${tool.release_date}T00:00:00Z`);

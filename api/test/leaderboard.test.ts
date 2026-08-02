@@ -33,6 +33,16 @@ describe("buildLeaderboardResponse", () => {
   it("400s on an unknown model", () => {
     expect(() => buildLeaderboardResponse({ model: "nope" })).toThrow();
   });
+
+  it("accepts as_of and reproduces the same ranking deterministically", () => {
+    const board = buildLeaderboardResponse({ as_of: "2025-01-01" });
+    expect(board.length).toBe(TOOLS.length);
+    expect(buildLeaderboardResponse({ as_of: "2025-01-01" })).toEqual(board);
+  });
+
+  it("400s on an invalid as_of date", () => {
+    expect(() => buildLeaderboardResponse({ as_of: "not-a-date" })).toThrow();
+  });
 });
 
 describe("GET /api/leaderboard", () => {
@@ -59,6 +69,19 @@ describe("GET /api/leaderboard", () => {
   it("400s on ?model=nope with a clear error message", async () => {
     const app = buildServer();
     const res = await app.inject({ method: "GET", url: "/api/leaderboard?model=nope" });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toContain("nope");
+  });
+
+  it("accepts ?as_of=YYYY-MM-DD", async () => {
+    const app = buildServer();
+    const res = await app.inject({ method: "GET", url: "/api/leaderboard?as_of=2025-01-01" });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it("400s on an invalid ?as_of", async () => {
+    const app = buildServer();
+    const res = await app.inject({ method: "GET", url: "/api/leaderboard?as_of=nope" });
     expect(res.statusCode).toBe(400);
     expect(res.json().error).toContain("nope");
   });
