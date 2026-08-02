@@ -139,8 +139,9 @@ export default function Compare() {
 
   const delta = useMemo(() => {
     if (!resultA.result || !resultB.result) return null
+    if (resultA.toolId !== idA || resultB.toolId !== idB) return null
     return resultA.result.human_equiv_years - resultB.result.human_equiv_years
-  }, [resultA, resultB])
+  }, [resultA, resultB, idA, idB])
 
   return (
     <div className="app cmp-page">
