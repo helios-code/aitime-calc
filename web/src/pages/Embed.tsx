@@ -23,6 +23,7 @@ export default function Embed() {
   const [source, setSource] = useState<'live' | 'mock'>('mock')
 
   useEffect(() => {
+    if (initial.mode === 'date') return
     let cancelled = false
     fetchTools().then(({ tools }) => {
       if (cancelled) return
@@ -34,8 +35,12 @@ export default function Embed() {
     }
   }, [])
 
-  const selectedTool = useMemo(() => tools.find((t) => t.id === selectedToolId), [tools, selectedToolId])
-  const releaseDate = selectedTool?.release_date ?? tools[0]?.release_date
+  const selectedTool = useMemo(
+    () => (initial.mode === 'tool' ? tools.find((t) => t.id === selectedToolId) : undefined),
+    [tools, selectedToolId],
+  )
+  const releaseDate =
+    initial.mode === 'date' ? initial.date! : (selectedTool?.release_date ?? tools[0]?.release_date)
 
   useEffect(() => {
     if (!releaseDate) return
