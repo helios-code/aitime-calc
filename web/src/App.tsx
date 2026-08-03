@@ -12,6 +12,8 @@ import { ResultHero } from './components/ResultHero'
 import { ShareCard } from './components/ShareCard'
 import { MethodologyExplainer } from './components/MethodologyExplainer'
 import { SourceBadge } from './components/SourceBadge'
+import { buildOgImageUrl, updateShareMeta } from './lib/headMeta'
+import { buildShareText } from './lib/shareText'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -62,6 +64,19 @@ function App() {
     url.searchParams.set('model', model)
     return url.toString()
   }, [mode, selectedToolId, customDate, model])
+
+  useEffect(() => {
+    if (!result) return
+    updateShareMeta({
+      title: `aitime-calc — ${buildShareText(result, selectedTool?.name)}`,
+      description: result.methodology_note,
+      url: shareUrl,
+      // Only tool mode has a known tool id for /api/og to render — date mode
+      // has no dynamic card, so it keeps whatever image tag is already set
+      // (the static index.html fallback).
+      image: mode === 'tool' ? buildOgImageUrl(selectedToolId, model, TODAY) : undefined,
+    })
+  }, [result, selectedTool, shareUrl, mode, selectedToolId, model])
 
   useEffect(() => {
     if (!releaseDate) return
