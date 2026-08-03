@@ -64,11 +64,17 @@ function App() {
     return url.toString()
   }, [mode, selectedToolId, customDate, model])
 
-  // /embed only supports ?tool= (no date-mode), so the embed action is tool-mode only.
-  const embedSnippet = useMemo(() => {
-    if (mode !== 'tool') return undefined
-    return buildEmbedSnippet(window.location.origin, selectedToolId, model)
-  }, [mode, selectedToolId, model])
+  // /embed reads the same ?tool= / ?date= contract as this page, so the embed
+  // action follows whichever mode is active.
+  const embedSnippet = useMemo(
+    () =>
+      buildEmbedSnippet(
+        window.location.origin,
+        mode === 'tool' ? { mode: 'tool', toolId: selectedToolId } : { mode: 'date', date: customDate },
+        model,
+      ),
+    [mode, selectedToolId, customDate, model],
+  )
 
   useEffect(() => {
     if (!releaseDate) return
