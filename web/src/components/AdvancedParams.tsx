@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { commitBoundedNumber } from '../lib/boundedNumber'
 import {
   D_AI_MONTHS_MAX,
   D_AI_MONTHS_MIN,
@@ -15,16 +16,12 @@ interface Props {
   onChangeDClassicMonths: (value: number) => void
 }
 
-function clamp(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) return min
-  return Math.min(max, Math.max(min, value))
-}
-
 // A plain controlled `<input type="number">` re-snaps its displayed value on
 // every keystroke, which fights the user mid-edit (typing "4." reads as NaN,
 // clamps to min, and erases what they just typed). This keeps its own text
-// buffer, only committing (and clamping) the parsed number on blur, and only
-// syncing back from the prop when it changes from outside (e.g. Reset).
+// buffer and only resolves it on blur (commitBoundedNumber: clamp what parses,
+// keep the current value for what doesn't), syncing back from the prop only
+// when it changes from outside (e.g. Reset).
 function BoundedNumberInput({
   id,
   step,
@@ -58,9 +55,9 @@ function BoundedNumberInput({
       value={text}
       onChange={(e) => setText(e.target.value)}
       onBlur={() => {
-        const clamped = clamp(Number.parseFloat(text), min, max)
-        setText(String(clamped))
-        onCommit(clamped)
+        const committed = commitBoundedNumber(text, min, max, value)
+        setText(String(committed))
+        onCommit(committed)
       }}
     />
   )
