@@ -3,12 +3,16 @@ import '../App.css'
 import './Leaderboard.css'
 import { fetchLeaderboard } from '../lib/leaderboardApi'
 import { SORT_LABELS, sortEntries, type SortDir, type SortKey } from '../lib/leaderboardSort'
+import { downloadTextFile, exportFilename, toCsv, toJson } from '../lib/export'
 import { SourceBadge } from '../components/SourceBadge'
-import type { LeaderboardEntry } from '../types'
+import type { CalcModel, LeaderboardEntry } from '../types'
 
 const PAGE_TITLE = 'AI tool leaderboard — human-equivalent years compressed | aitime-calc'
 const PAGE_DESCRIPTION =
   'Every AI tool ranked by how much human-equivalent time it compressed, from GPT-2 to the present.'
+// Single source of truth: the model the table is ranked with is the model the
+// export is stamped with.
+const LEADERBOARD_MODEL: CalcModel = 'base'
 
 function useDocumentMeta(title: string, description: string) {
   useEffect(() => {
@@ -43,10 +47,14 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true)
   const [sortKey, setSortKey] = useState<SortKey>('rank')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  // Captured on mount, one render before fetchLeaderboard reads its own "today"
+  // — so the export stamp matches the date the ranking was computed for.
+  const [asOf] = useState(() => new Date().toISOString().slice(0, 10))
+  const [exportError, setExportError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    fetchLeaderboard('base').then(({ entries, source }) => {
+    fetchLeaderboard(LEADERBOARD_MODEL).then(({ entries, source }) => {
       if (cancelled) return
       setEntries(entries)
       setSource(source)
@@ -73,6 +81,17 @@ export default function Leaderboard() {
     }
   }
 
+  function handleExport(kind: 'csv' | 'json') {
+    const meta = { model: LEADERBOARD_MODEL, as_of: asOf, source }
+    // Exports exactly what is on screen — same rows, same sort order.
+    const contents = kind === 'csv' ? toCsv(sorted, meta) : toJson(sorted, meta)
+    const mimeType = kind === 'csv' ? 'text/csv;charset=utf-8' : 'application/json;charset=utf-8'
+    const ok = downloadTextFile(exportFilename(kind, asOf), contents, mimeType)
+    setExportError(ok ? null : 'Download blocked by the browser. Check its download settings and try again.')
+  }
+
+  const canExport = !loading && sorted.length > 0
+
   return (
     <div className="app lb-page">
       <header className="app-header">
@@ -82,6 +101,33 @@ export default function Leaderboard() {
       </header>
 
       <main className="app-main">
+        <div className="lb-toolbar">
+          <span className="lb-toolbar-label" id="lb-export-label">
+            Export
+          </span>
+          <div className="lb-toolbar-actions" role="group" aria-labelledby="lb-export-label">
+            <button
+              type="button"
+              className="share-btn share-btn--ghost lb-export-btn"
+              onClick={() => handleExport('csv')}
+              disabled={!canExport}
+            >
+              CSV
+            </button>
+            <button
+              type="button"
+              className="share-btn share-btn--ghost lb-export-btn"
+              onClick={() => handleExport('json')}
+              disabled={!canExport}
+            >
+              JSON
+            </button>
+          </div>
+        </div>
+        <p className="lb-export-status" role="status">
+          {exportError}
+        </p>
+
         <div className="lb-table-wrap">
           <table className="lb-table">
             <caption className="lb-caption">

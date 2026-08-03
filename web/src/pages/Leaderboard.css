@@ -7,6 +7,48 @@
   color: var(--text-dim);
 }
 
+.lb-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.lb-toolbar-label {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+
+.lb-toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.lb-export-btn {
+  padding: 6px 14px;
+  font-size: var(--text-xs);
+}
+
+.lb-export-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lb-export-status:empty {
+  display: none;
+}
+
+.lb-export-status {
+  margin: 0;
+  text-align: right;
+  font-size: var(--text-xs);
+  color: #f87171;
+}
+
 .lb-table-wrap {
   width: 100%;
   overflow-x: auto;
