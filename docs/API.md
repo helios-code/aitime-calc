@@ -97,6 +97,113 @@ Computes the ATEM (AI-Time Equivalence Model) result — see `docs/METHODOLOGY.m
 { "error": "d_classic_months must be a positive number" }
 ```
 
+## GET /api/timeline
+
+Scores every dataset tool against one `as_of`, oldest release first — the batch form of `GET /api/calc?tool_id=…`. No new math: each row matches what `/api/calc` returns for that tool alone.
+
+**Params** (all optional)
+
+| param | type | notes |
+|---|---|---|
+| `as_of` | string (`YYYY-MM-DD`) | defaults to today (UTC) |
+| `model` | `"base"` \| `"accelerating"` | defaults to `"base"`; unlike `/api/calc`, an unrecognized value is a `400` rather than a silent fallback |
+| `d_classic_months` | number > 0 | defaults to `72` |
+| `d_ai_months` | number > 0 | defaults to `4.5` |
+
+Tools whose `release_date` is after `as_of` are omitted (they would score negative human-equivalent years), so `count` is the number of rows returned, not the dataset size.
+
+**Response `200`** (`GET /api/timeline?as_of=2026-07-30`, first row shown)
+
+```json
+{
+  "as_of": "2026-07-30",
+  "model": "base",
+  "params": { "d_classic_months": 72, "d_ai_months": 4.5, "multiplier": 16 },
+  "count": 82,
+  "tools": [
+    {
+      "tool_id": "gpt-2",
+      "name": "GPT-2",
+      "vendor": "OpenAI",
+      "category": "llm",
+      "release_date": "2019-02-14",
+      "elapsed": { "days": 2723, "months": 89.46, "human": "7 yrs 5 mo" },
+      "ai_doublings": 19.881,
+      "human_equiv_years": 119.29,
+      "human_equiv_human": "119 years 3 months"
+    }
+  ],
+  "sources": ["METR — Measuring AI Ability to Complete Long Tasks (2025-03)", "…"]
+}
+```
+
+**Errors `400`**
+
+```json
+{ "error": "invalid as_of date: not-a-date" }
+{ "error": "unknown model: sideways" }
+{ "error": "d_ai_months must be a positive number" }
+```
+
+## GET /api/compare
+
+Scores two tools against the same `as_of` and reports the gap between them.
+
+**Params**
+
+| param | type | required | notes |
+|---|---|---|---|
+| `tool` | string | yes | tool id or known alias (same resolver as `/api/calc`'s `tool_id`) |
+| `vs` | string | yes | the tool to compare against |
+| `as_of` | string (`YYYY-MM-DD`) | no | defaults to today (UTC) |
+| `model` | `"base"` \| `"accelerating"` | no | defaults to `"base"`; `400` on an unrecognized value |
+| `d_classic_months` | number > 0 | no | defaults to `72` |
+| `d_ai_months` | number > 0 | no | defaults to `4.5` |
+
+`delta.human_equiv_years` is `a − b` (signed); `delta.ahead` names the tool that has compressed more human-equivalent time, or `null` when the two are level.
+
+**Response `200`** (`GET /api/compare?tool=gpt-4&vs=claude-sonnet-4-5&as_of=2026-07-30`)
+
+```json
+{
+  "as_of": "2026-07-30",
+  "model": "base",
+  "params": { "d_classic_months": 72, "d_ai_months": 4.5, "multiplier": 16 },
+  "a": {
+    "tool_id": "gpt-4",
+    "name": "GPT-4",
+    "vendor": "OpenAI",
+    "category": "llm",
+    "release_date": "2023-03-14",
+    "elapsed": { "days": 1234, "months": 40.54, "human": "3 yrs 5 mo" },
+    "ai_doublings": 9.01,
+    "human_equiv_years": 54.06,
+    "human_equiv_human": "54 years 1 month"
+  },
+  "b": {
+    "tool_id": "claude-sonnet-4-5",
+    "name": "Claude Sonnet 4.5",
+    "vendor": "Anthropic",
+    "category": "reasoning-llm",
+    "release_date": "2025-09-29",
+    "elapsed": { "days": 304, "months": 9.99, "human": "10 mo" },
+    "ai_doublings": 2.22,
+    "human_equiv_years": 13.32,
+    "human_equiv_human": "13 years 4 months"
+  },
+  "delta": { "human_equiv_years": 40.74, "human_equiv_human": "40 years 9 months", "ahead": "gpt-4" },
+  "sources": ["METR — Measuring AI Ability to Complete Long Tasks (2025-03)", "…"]
+}
+```
+
+**Errors `400`**
+
+```json
+{ "error": "tool and vs are both required" }
+{ "error": "unknown tool: nope" }
+{ "error": "gpt-2 was released after as_of 2018-01-01" }
+```
+
 ## GET /api/og
 
 Renders a `1200×630` PNG social-share card (OpenGraph image). Two modes:
@@ -119,4 +226,4 @@ GET /api/og?date=2025-03-14
 
 ## Not yet implemented
 
-There is no batch/ranking endpoint (`/api/leaderboard` does not exist on `main`) — the web app's leaderboard page computes rankings client-side from `GET /api/tools` instead. If a batch endpoint ships later, document it here.
+There is no *ranking* endpoint (`/api/leaderboard` does not exist on `main`) — the web app's leaderboard page computes rankings client-side from `GET /api/tools` instead. `GET /api/timeline` is the batch scorer, but it returns tools in release order, not ranked by human-equivalent years. If a ranking endpoint ships later, document it here.

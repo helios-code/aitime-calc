@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
-import { findTool, TOOLS } from "./dataset.js";
+import { findTool, TOOLS, type AiTool } from "./dataset.js";
 import {
   computeAtem,
   DEFAULT_PARAMS,
@@ -39,6 +39,20 @@ interface OgQuery {
   tool?: string;
   model?: string;
   date?: string;
+}
+
+// Shared by /api/timeline and /api/compare: the /api/calc knobs that still make
+// sense when the release date comes from the dataset rather than the query.
+interface AtemQuery {
+  as_of?: string;
+  model?: string;
+  d_classic_months?: string | number;
+  d_ai_months?: string | number;
+}
+
+interface CompareQuery extends AtemQuery {
+  tool?: string;
+  vs?: string;
 }
 
 function isValidDate(d: Date): boolean {
@@ -205,6 +219,143 @@ export function renderOgPixels(q: OgQuery) {
   }
 }
 
+function resolveAsOf(raw: string | undefined): { asOfStr: string; asOf: Date } {
+  const asOfStr = raw ?? new Date().toISOString().slice(0, 10);
+  const asOf = new Date(`${asOfStr}T00:00:00Z`);
+  if (!isValidDate(asOf)) {
+    throw { status: 400, error: `invalid as_of date: ${asOfStr}` };
+  }
+  return { asOfStr, asOf };
+}
+
+function resolveDoublingParams(q: AtemQuery | CalcQuery) {
+  const dClassicMonths = q.d_classic_months !== undefined ? Number(q.d_classic_months) : DEFAULT_PARAMS.dClassicMonths;
+  const dAiMonths = q.d_ai_months !== undefined ? Number(q.d_ai_months) : DEFAULT_PARAMS.dAiMonths;
+  if (!Number.isFinite(dClassicMonths) || dClassicMonths <= 0) {
+    throw { status: 400, error: "d_classic_months must be a positive number" };
+  }
+  if (!Number.isFinite(dAiMonths) || dAiMonths <= 0) {
+    throw { status: 400, error: "d_ai_months must be a positive number" };
+  }
+  return { dClassicMonths, dAiMonths };
+}
+
+// Rejects an unrecognized model instead of silently defaulting to "base" the
+// way /api/calc does: these endpoints echo `model` back in the payload, so a
+// typo'd value would otherwise be reported as a deliberate base-model answer.
+function resolveModel(raw: string | undefined): CalcModel {
+  if (raw !== undefined && raw !== "base" && raw !== "accelerating") {
+    throw { status: 400, error: `unknown model: ${raw}` };
+  }
+  return raw === "accelerating" ? "accelerating" : "base";
+}
+
+function isUnreleasedAt(tool: AiTool, asOf: Date): boolean {
+  return new Date(`${tool.release_date}T00:00:00Z`).getTime() > asOf.getTime();
+}
+
+/** One dataset tool scored against as_of — the row shape /api/timeline and /api/compare share. */
+function buildToolEntry(
+  tool: AiTool,
+  asOf: Date,
+  model: CalcModel,
+  params: { dClassicMonths: number; dAiMonths: number },
+) {
+  const release = new Date(`${tool.release_date}T00:00:00Z`);
+  const result = computeAtem(release, asOf, model, params);
+  return {
+    tool_id: tool.id,
+    name: tool.name,
+    vendor: tool.vendor,
+    category: tool.category,
+    release_date: tool.release_date,
+    elapsed: {
+      days: Math.round(result.elapsedDays),
+      months: Number(result.elapsedMonths.toFixed(2)),
+      human: monthsToHuman(result.elapsedMonths),
+    },
+    ai_doublings: Number(result.aiDoublings.toFixed(3)),
+    human_equiv_years: Number(result.humanEquivYears.toFixed(2)),
+    human_equiv_human: yearsToHuman(result.humanEquivYears),
+  };
+}
+
+function buildTimelineResponse(q: AtemQuery) {
+  const { asOfStr, asOf } = resolveAsOf(q.as_of);
+  const model = resolveModel(q.model);
+  const params = resolveDoublingParams(q);
+
+  // computeAtem doesn't clamp elapsed time, so a tool that ships after as_of
+  // would score negative human-equivalent years. Drop those instead, matching
+  // /api/leaderboard.
+  const tools = TOOLS.filter((tool) => !isUnreleasedAt(tool, asOf))
+    .map((tool) => buildToolEntry(tool, asOf, model, params))
+    .sort((a, b) => (a.release_date < b.release_date ? -1 : a.release_date > b.release_date ? 1 : 0));
+
+  return {
+    as_of: asOfStr,
+    model,
+    params: {
+      d_classic_months: params.dClassicMonths,
+      d_ai_months: params.dAiMonths,
+      multiplier: Number((params.dClassicMonths / params.dAiMonths).toFixed(3)),
+    },
+    count: tools.length,
+    tools,
+    sources: ATEM_SOURCES,
+  };
+}
+
+function buildCompareResponse(q: CompareQuery) {
+  if (!q.tool || !q.vs) {
+    throw { status: 400, error: "tool and vs are both required" };
+  }
+  // findTool routes through resolveToolId, so legacy ids in shared links keep working.
+  const toolA = findTool(q.tool);
+  if (!toolA) {
+    throw { status: 400, error: `unknown tool: ${q.tool}` };
+  }
+  const toolB = findTool(q.vs);
+  if (!toolB) {
+    throw { status: 400, error: `unknown tool: ${q.vs}` };
+  }
+
+  const { asOfStr, asOf } = resolveAsOf(q.as_of);
+  const model = resolveModel(q.model);
+  const params = resolveDoublingParams(q);
+
+  // Same reason /api/timeline filters these out — a not-yet-released tool would
+  // come back with negative human-equivalent years.
+  for (const tool of [toolA, toolB]) {
+    if (isUnreleasedAt(tool, asOf)) {
+      throw { status: 400, error: `${tool.id} was released after as_of ${asOfStr}` };
+    }
+  }
+
+  const a = buildToolEntry(toolA, asOf, model, params);
+  const b = buildToolEntry(toolB, asOf, model, params);
+  const deltaYears = Number((a.human_equiv_years - b.human_equiv_years).toFixed(2));
+
+  return {
+    as_of: asOfStr,
+    model,
+    params: {
+      d_classic_months: params.dClassicMonths,
+      d_ai_months: params.dAiMonths,
+      multiplier: Number((params.dClassicMonths / params.dAiMonths).toFixed(3)),
+    },
+    a,
+    b,
+    delta: {
+      // Positive means the older release (a) has compressed more human-equivalent time.
+      human_equiv_years: deltaYears,
+      human_equiv_human: yearsToHuman(Math.abs(deltaYears)),
+      ahead: deltaYears === 0 ? null : deltaYears > 0 ? a.tool_id : b.tool_id,
+    },
+    sources: ATEM_SOURCES,
+  };
+}
+
 function buildCalcResponse(q: CalcQuery) {
   const toolId = q.tool_id;
   let releaseStr = q.release ?? q.release_date;
@@ -226,22 +377,12 @@ function buildCalcResponse(q: CalcQuery) {
     throw { status: 400, error: `invalid release date: ${releaseStr}` };
   }
 
-  const asOfStr = q.as_of ?? new Date().toISOString().slice(0, 10);
-  const asOf = new Date(`${asOfStr}T00:00:00Z`);
-  if (!isValidDate(asOf)) {
-    throw { status: 400, error: `invalid as_of date: ${asOfStr}` };
-  }
-
+  const { asOfStr, asOf } = resolveAsOf(q.as_of);
+  // Unchanged from before these helpers existed: /api/calc silently treats an
+  // unrecognized model as "base" (resolveModel, used by the newer endpoints,
+  // 400s instead) — a documented, already-shipped contract.
   const model: CalcModel = q.model === "accelerating" ? "accelerating" : "base";
-
-  const dClassicMonths = q.d_classic_months !== undefined ? Number(q.d_classic_months) : DEFAULT_PARAMS.dClassicMonths;
-  const dAiMonths = q.d_ai_months !== undefined ? Number(q.d_ai_months) : DEFAULT_PARAMS.dAiMonths;
-  if (!Number.isFinite(dClassicMonths) || dClassicMonths <= 0) {
-    throw { status: 400, error: "d_classic_months must be a positive number" };
-  }
-  if (!Number.isFinite(dAiMonths) || dAiMonths <= 0) {
-    throw { status: 400, error: "d_ai_months must be a positive number" };
-  }
+  const { dClassicMonths, dAiMonths } = resolveDoublingParams(q);
 
   const result = computeAtem(release, asOf, model, { dClassicMonths, dAiMonths });
 
@@ -294,6 +435,30 @@ export function buildServer() {
       }
       reply.header("Content-Type", "image/png");
       return png;
+    } catch (err: any) {
+      if (err?.status && err?.error) {
+        reply.code(err.status);
+        return { error: err.error };
+      }
+      throw err;
+    }
+  });
+
+  app.get<{ Querystring: AtemQuery }>("/api/timeline", async (req, reply) => {
+    try {
+      return buildTimelineResponse(req.query);
+    } catch (err: any) {
+      if (err?.status && err?.error) {
+        reply.code(err.status);
+        return { error: err.error };
+      }
+      throw err;
+    }
+  });
+
+  app.get<{ Querystring: CompareQuery }>("/api/compare", async (req, reply) => {
+    try {
+      return buildCompareResponse(req.query);
     } catch (err: any) {
       if (err?.status && err?.error) {
         reply.code(err.status);
