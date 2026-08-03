@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TOOLS } from "../src/dataset.js";
+import { findTool, TOOLS } from "../src/dataset.js";
 
 describe("dataset integrity", () => {
   it("has unique ids", () => {
@@ -19,6 +19,19 @@ describe("dataset integrity", () => {
       expect(t.name.trim(), `${t.id} missing name`).not.toBe("");
       expect(t.vendor.trim(), `${t.id} missing vendor`).not.toBe("");
       expect(t.note.trim(), `${t.id} missing note`).not.toBe("");
+    }
+  });
+
+  // Fixed cutoff, never `new Date()` — a freshness assertion that reads the ambient
+  // clock would start failing on its own without the dataset changing.
+  it("covers the current generation of releases (entries past 2026-01-01)", () => {
+    const recent = TOOLS.filter((t) => t.release_date >= "2026-01-01");
+    expect(recent.length, "dataset has no 2026 releases").toBeGreaterThan(0);
+  });
+
+  it("resolves current-generation ids", () => {
+    for (const id of ["claude-opus-5", "claude-sonnet-5", "gpt-5-6", "gemini-3-6-flash"]) {
+      expect(findTool(id), `${id} not resolvable`).toBeDefined();
     }
   });
 });
