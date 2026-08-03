@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import '../App.css'
 import './Compare.css'
 import { fetchCalc, fetchTools } from '../lib/api'
+import { copyToClipboard } from '../lib/clipboard'
 import { parseCompareState } from '../lib/urlParams'
 import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from '../data/tools'
 import type { CalcResult, Tool } from '../types'
@@ -171,7 +172,7 @@ export default function Compare() {
           <span className="share-card-label">Share this comparison</span>
           <p className="share-card-text">{shareUrl}</p>
           <div className="share-card-actions">
-            <button type="button" className="share-btn" onClick={() => navigator.clipboard?.writeText(shareUrl)}>
+            <button type="button" className="share-btn" onClick={() => void copyToClipboard(shareUrl)}>
               Copy link
             </button>
           </div>
