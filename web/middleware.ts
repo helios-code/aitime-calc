@@ -13,6 +13,13 @@
 // directly. Accepted for now — no caching layer added — since HTML is a tiny
 // payload and this only runs for document navigations, not asset requests.
 
+import {
+  D_AI_MONTHS_MAX,
+  D_AI_MONTHS_MIN,
+  D_CLASSIC_MONTHS_MAX,
+  D_CLASSIC_MONTHS_MIN,
+} from './src/lib/urlParams'
+
 declare const process: { env: Record<string, string | undefined> }
 
 export const config = {
@@ -69,6 +76,18 @@ export function resolveMeta(pathname: string, searchParams: URLSearchParams): Ro
   return { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION }
 }
 
+// The OG card must depict what a visitor actually sees. parseInitialState()
+// ignores doubling params outside these bounds and falls back to the defaults,
+// and /api/og accepts any positive number — so forwarding a raw out-of-range
+// value would unfurl a card that contradicts the page it links to. Drop those
+// instead: the card then renders the same defaults the page does.
+function boundedParam(raw: string | null, min: number, max: number): string | null {
+  if (!raw) return null
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n < min || n > max) return null
+  return raw
+}
+
 export function buildOgImageUrl(searchParams: URLSearchParams): string | null {
   const apiOrigin = process.env.VITE_API_URL
   if (!apiOrigin) return null
@@ -82,8 +101,8 @@ export function buildOgImageUrl(searchParams: URLSearchParams): string | null {
   const url = new URL('/api/og', apiOrigin)
   const model = searchParams.get('model')
   const date = searchParams.get('date')
-  const dClassicMonths = searchParams.get('d_classic_months')
-  const dAiMonths = searchParams.get('d_ai_months')
+  const dClassicMonths = boundedParam(searchParams.get('d_classic_months'), D_CLASSIC_MONTHS_MIN, D_CLASSIC_MONTHS_MAX)
+  const dAiMonths = boundedParam(searchParams.get('d_ai_months'), D_AI_MONTHS_MIN, D_AI_MONTHS_MAX)
   url.searchParams.set('tool', tool)
   if (model) url.searchParams.set('model', model)
   if (date) url.searchParams.set('date', date)
