@@ -29,4 +29,16 @@ describe('buildTimelinePoints', () => {
   it('returns an empty array for an empty tool list', () => {
     expect(buildTimelinePoints([], '2026-01-01')).toEqual([])
   })
+
+  it('skips rows with a malformed or missing release_date instead of throwing', () => {
+    const malformed = [
+      TOOLS[0],
+      { id: 'bad-date', name: 'Bad', vendor: 'X', release_date: 'not-a-date', category: 'LLM' },
+      { id: 'no-date', name: 'None', vendor: 'X', category: 'LLM' } as unknown as Tool,
+      null as unknown as Tool,
+      TOOLS[1],
+    ]
+    const points = buildTimelinePoints(malformed, '2026-01-01')
+    expect(points.map((p) => p.tool.id)).toEqual(['gpt-2', 'gpt-4o'])
+  })
 })
