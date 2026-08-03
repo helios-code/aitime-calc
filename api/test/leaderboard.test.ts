@@ -2,9 +2,14 @@ import { describe, expect, it } from "vitest";
 import { buildServer, buildLeaderboardResponse } from "../src/server.js";
 import { TOOLS } from "../src/dataset.js";
 
+// Fixed a day past every dataset release_date so "full dataset" assertions
+// don't depend on ambient server-now (which drifts relative to the dataset
+// and, given a same-day-as-release run, could flip the < vs <= boundary).
+const FIXED_AS_OF = TOOLS.reduce((max, t) => (t.release_date > max ? t.release_date : max), "1970-01-01");
+
 describe("buildLeaderboardResponse", () => {
   it("ranks every tool in the dataset, descending by human_equiv_years", () => {
-    const board = buildLeaderboardResponse({});
+    const board = buildLeaderboardResponse({ as_of: FIXED_AS_OF });
     expect(board.length).toBe(TOOLS.length);
     for (let i = 1; i < board.length; i++) {
       expect(board[i - 1].human_equiv_years).toBeGreaterThanOrEqual(board[i].human_equiv_years);
@@ -12,12 +17,12 @@ describe("buildLeaderboardResponse", () => {
   });
 
   it("assigns sequential ranks starting at 1", () => {
-    const board = buildLeaderboardResponse({});
+    const board = buildLeaderboardResponse({ as_of: FIXED_AS_OF });
     board.forEach((entry, i) => expect(entry.rank).toBe(i + 1));
   });
 
   it("older tools (earlier release_date) rank ahead of newer ones by default", () => {
-    const board = buildLeaderboardResponse({});
+    const board = buildLeaderboardResponse({ as_of: FIXED_AS_OF });
     const oldest = TOOLS.reduce((a, b) => (b.release_date < a.release_date ? b : a));
     const newest = TOOLS.reduce((a, b) => (b.release_date > a.release_date ? b : a));
     const oldestEntry = board.find((e) => e.tool_id === oldest.id)!;
@@ -26,7 +31,7 @@ describe("buildLeaderboardResponse", () => {
   });
 
   it("accepts model=accelerating and re-ranks", () => {
-    const board = buildLeaderboardResponse({ model: "accelerating" });
+    const board = buildLeaderboardResponse({ model: "accelerating", as_of: FIXED_AS_OF });
     expect(board.length).toBe(TOOLS.length);
   });
 
@@ -61,7 +66,7 @@ describe("buildLeaderboardResponse", () => {
 describe("GET /api/leaderboard", () => {
   it("returns the full ranked dataset as JSON", async () => {
     const app = buildServer();
-    const res = await app.inject({ method: "GET", url: "/api/leaderboard" });
+    const res = await app.inject({ method: "GET", url: `/api/leaderboard?as_of=${FIXED_AS_OF}` });
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(Array.isArray(body.leaderboard)).toBe(true);
