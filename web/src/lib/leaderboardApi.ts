@@ -18,12 +18,14 @@ function isValidTool(t: unknown): t is Tool {
   )
 }
 
-// There is no live batch-ranking endpoint (api/src/server.ts has no
-// /api/leaderboard route) — instead we fetch the real tool dataset via
-// fetchTools() (live /api/tools, falling back to FALLBACK_TOOLS) and rank it
-// client-side with the same computeCalc math the rest of the app uses. This
-// keeps the 'live' badge honest (it reflects whether the dataset itself came
-// from the API) without depending on an endpoint that doesn't exist.
+// The web client ranks client-side on purpose: it fetches the tool dataset via
+// fetchTools() (live /api/tools, falling back to FALLBACK_TOOLS) and applies the
+// same computeCalc math the rest of the app uses, so the 'live' badge stays
+// honest — it reflects whether the dataset itself came from the API.
+// api/src/server.ts DOES now expose a batch-ranking GET /api/leaderboard (see
+// docs/API.md), but it is for API consumers; switching this page over to it is a
+// separate change, since it would move the ranking math server-side and give the
+// badge a different meaning.
 export async function fetchLeaderboard(model: CalcModel = 'base'): Promise<LeaderboardResult> {
   const { tools, source } = await fetchTools()
   const asOf = new Date().toISOString().slice(0, 10)
