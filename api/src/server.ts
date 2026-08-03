@@ -12,6 +12,7 @@ import {
   monthsToHuman,
   yearsToHuman,
   type CalcModel,
+  type AtemParams,
 } from "./atem.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -39,6 +40,20 @@ interface OgQuery {
   tool?: string;
   model?: string;
   date?: string;
+  d_classic_months?: string | number;
+  d_ai_months?: string | number;
+}
+
+function resolveAtemParams(q: OgQuery) {
+  const dClassicMonths = q.d_classic_months !== undefined ? Number(q.d_classic_months) : DEFAULT_PARAMS.dClassicMonths;
+  const dAiMonths = q.d_ai_months !== undefined ? Number(q.d_ai_months) : DEFAULT_PARAMS.dAiMonths;
+  if (!Number.isFinite(dClassicMonths) || dClassicMonths <= 0) {
+    throw { status: 400, error: "d_classic_months must be a positive number" };
+  }
+  if (!Number.isFinite(dAiMonths) || dAiMonths <= 0) {
+    throw { status: 400, error: "d_ai_months must be a positive number" };
+  }
+  return { dClassicMonths, dAiMonths };
 }
 
 // Shared by /api/timeline and /api/compare: the /api/calc knobs that still make
@@ -129,7 +144,7 @@ function formatDateLabel(d: Date): string {
 // Date-mode card: no tool_id, `date` is the release_date input (same semantics as
 // /api/calc's date mode — release_date=date, as_of=today). Mirrors the tool-mode
 // card layout but without a vendor/tool-name line, since there is no tool.
-function buildDateModeOgSvg(dateStr: string, modelParam?: string): string {
+function buildDateModeOgSvg(dateStr: string, modelParam: string | undefined, atemParams: AtemParams): string {
   if (modelParam !== undefined && modelParam !== "base" && modelParam !== "accelerating") {
     throw { status: 400, error: `unknown model: ${modelParam}` };
   }
@@ -146,7 +161,7 @@ function buildDateModeOgSvg(dateStr: string, modelParam?: string): string {
     throw { status: 400, error: `date ${dateStr} is in the future` };
   }
 
-  const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
+  const result = computeAtem(release, asOf, model, atemParams);
   const heroLine = `By ${formatDateLabel(release)} = ~${yearsToHuman(result.humanEquivYears)}`;
 
   const eyebrow = escapeXml("release date");
@@ -164,12 +179,13 @@ function buildDateModeOgSvg(dateStr: string, modelParam?: string): string {
 }
 
 export function buildOgSvg(q: OgQuery): string {
+  const atemParams = resolveAtemParams(q);
   const toolId = q.tool;
   if (!toolId) {
     if (!q.date) {
       throw { status: 400, error: "tool or date is required" };
     }
-    return buildDateModeOgSvg(q.date, q.model);
+    return buildDateModeOgSvg(q.date, q.model, atemParams);
   }
   const tool = findTool(toolId);
   if (!tool) {
@@ -191,7 +207,7 @@ export function buildOgSvg(q: OgQuery): string {
     throw { status: 400, error: `date ${asOfStr} is before ${tool.name}'s release date` };
   }
 
-  const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
+  const result = computeAtem(release, asOf, model, atemParams);
   const heroLine = `${tool.name} = ~${yearsToHuman(result.humanEquivYears)}`;
 
   const name = escapeXml(tool.name);

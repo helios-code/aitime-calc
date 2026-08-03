@@ -82,9 +82,13 @@ export function buildOgImageUrl(searchParams: URLSearchParams): string | null {
   const url = new URL('/api/og', apiOrigin)
   const model = searchParams.get('model')
   const date = searchParams.get('date')
+  const dClassicMonths = searchParams.get('d_classic_months')
+  const dAiMonths = searchParams.get('d_ai_months')
   url.searchParams.set('tool', tool)
   if (model) url.searchParams.set('model', model)
   if (date) url.searchParams.set('date', date)
+  if (dClassicMonths) url.searchParams.set('d_classic_months', dClassicMonths)
+  if (dAiMonths) url.searchParams.set('d_ai_months', dAiMonths)
   return url.toString()
 }
 
