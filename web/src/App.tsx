@@ -83,6 +83,9 @@ function App() {
       <header className="app-header">
         <span className="brand">aitime-calc</span>
         <p className="tagline">How much human progress did that AI release actually compress?</p>
+        <a className="timeline-link" href="/timeline">
+          See every tool on the timeline →
+        </a>
       </header>
 
       <main className="app-main">

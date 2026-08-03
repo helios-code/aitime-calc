@@ -25,6 +25,17 @@
   font-weight: 600;
 }
 
+.timeline-link {
+  color: var(--accent-2);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.timeline-link:hover,
+.timeline-link:focus-visible {
+  text-decoration: underline;
+}
+
 .tagline {
   font-size: var(--text-lg);
   color: var(--text-dim);

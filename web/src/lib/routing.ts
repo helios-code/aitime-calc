@@ -1,8 +1,9 @@
-export type Route = 'home' | 'methodology' | 'leaderboard'
+export type Route = 'home' | 'methodology' | 'leaderboard' | 'timeline'
 
 const ROUTE_PATHS: Record<string, Route> = {
   '/methodology': 'methodology',
   '/leaderboard': 'leaderboard',
+  '/timeline': 'timeline',
 }
 
 export function getRoute(pathname: string): Route {
