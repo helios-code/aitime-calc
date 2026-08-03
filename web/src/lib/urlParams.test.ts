@@ -123,4 +123,11 @@ describe('parseCompareState', () => {
     expect(parseCompareState('').model).toBe('base')
     expect(parseCompareState('?model=accelerating').model).toBe('accelerating')
   })
+
+  it('resolves legacy aliases on both sides, like parseInitialState', () => {
+    const state = parseCompareState('?tool=cursor-yolo&vs=gpt-3')
+    expect(state.a).toBe('cursor-yolo-mode')
+    expect(state.b).toBe('gpt-3-api')
+    expect(state.a).toBe(parseInitialState('?tool=cursor-yolo').tool)
+  })
 })
