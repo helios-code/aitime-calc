@@ -78,6 +78,23 @@ describe("renderOgPixels", () => {
     }
     expect(nonBackgroundPixels).toBeGreaterThan(500);
   });
+
+  // The 2026 dataset entries introduced names with '&', '/' and parentheses; a glyph
+  // outside the committed DejaVu subset renders blank on a perfectly valid PNG.
+  it("paints glyphs for current-generation tool names (subset coverage)", () => {
+    for (const id of ["gpt-5-6", "deepseek-v4", "claude-opus-5"]) {
+      const img = renderOgPixels({ tool: id, date: "2026-08-01" });
+      const pixels = img.pixels;
+      const bg = { r: 0x0b, g: 0x0f, b: 0x19 };
+      let nonBackgroundPixels = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        const [r, g, b] = [pixels[i], pixels[i + 1], pixels[i + 2]];
+        if (r !== bg.r || g !== bg.g || b !== bg.b) nonBackgroundPixels++;
+      }
+      img.free();
+      expect(nonBackgroundPixels, `${id} rendered blank`).toBeGreaterThan(500);
+    }
+  });
 });
 
 describe("GET /api/og", () => {
