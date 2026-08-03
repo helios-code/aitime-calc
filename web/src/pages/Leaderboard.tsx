@@ -189,6 +189,9 @@ export default function Leaderboard() {
           <a className="lb-back-link" href="/">
             ← back to calculator
           </a>
+          <a className="lb-back-link" href="/methodology">
+            how is this calculated?
+          </a>
         </footer>
       </main>
     </div>
