@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { SiteNav } from '../components/SiteNav'
 
 export function MethodologyPage() {
   useEffect(() => {
@@ -6,19 +7,17 @@ export function MethodologyPage() {
   }, [])
 
   return (
-    <div className="app methodology-page">
-      <header className="app-header">
-        <a className="methodology-back" href="/">
-          ← Back to calculator
-        </a>
-        <span className="brand">aitime-calc</span>
-        <h1 className="methodology-title">ATEM Methodology</h1>
-        <p className="tagline">
-          What the AI-Time Equivalence Model computes, and exactly how.
-        </p>
-      </header>
+    <>
+      <SiteNav />
+      <div className="app methodology-page">
+        <header className="app-header">
+          <h1 className="methodology-title">ATEM Methodology</h1>
+          <p className="tagline">
+            What the AI-Time Equivalence Model computes, and exactly how.
+          </p>
+        </header>
 
-      <main className="app-main methodology-page-body">
+        <main className="app-main methodology-page-body">
         <p className="methodology-source-note">
           Source of truth: <code>api/src/atem.ts</code> (<code>computeAtem</code>) and{' '}
           <code>api/src/dataset.ts</code>. If this page ever drifts from the code, the
@@ -226,16 +225,8 @@ humanEquivYears  = (months * multiplier) / 12
             scientific measurement of AI capability.
           </p>
         </section>
-      </main>
-
-      <footer className="app-footer">
-        <a className="methodology-back" href="/">
-          ← Back to calculator
-        </a>
-        <a className="methodology-back" href="/leaderboard">
-          See every tool ranked →
-        </a>
-      </footer>
-    </div>
+        </main>
+      </div>
+    </>
   )
 }

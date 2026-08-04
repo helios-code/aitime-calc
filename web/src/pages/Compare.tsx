@@ -8,6 +8,7 @@ import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from '../data/tools'
 import type { CalcResult, Tool } from '../types'
 import { ToolPicker } from '../components/ToolPicker'
 import { SourceBadge } from '../components/SourceBadge'
+import { SiteNav } from '../components/SiteNav'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 const FALLBACK_B = FALLBACK_TOOLS.find((t) => t.id !== DEFAULT_TOOL_ID)?.id ?? DEFAULT_TOOL_ID
@@ -147,58 +148,57 @@ export default function Compare() {
   }, [resultA, resultB, idA, idB])
 
   return (
-    <div className="app cmp-page">
-      <header className="app-header">
-        <span className="brand">aitime-calc</span>
-        <h1 className="tagline">Compare two tools</h1>
-        <p className="cmp-subtitle">Side-by-side human-equivalent time.</p>
-      </header>
+    <>
+      <SiteNav />
+      <div className="app cmp-page">
+        <header className="app-header">
+          <h1 className="tagline">Compare two tools</h1>
+          <p className="cmp-subtitle">Side-by-side human-equivalent time.</p>
+        </header>
 
-      <main className="app-main">
-        <div className="cmp-columns">
-          <ResultColumn
-            tools={tools}
-            selectedId={idA}
-            side={resultA}
-            onChange={setIdA}
-            pickerLabel="Search the first AI tool to compare"
-          />
-          <div className="cmp-vs" aria-hidden="true">
-            vs
+        <main className="app-main">
+          <div className="cmp-columns">
+            <ResultColumn
+              tools={tools}
+              selectedId={idA}
+              side={resultA}
+              onChange={setIdA}
+              pickerLabel="Search the first AI tool to compare"
+            />
+            <div className="cmp-vs" aria-hidden="true">
+              vs
+            </div>
+            <ResultColumn
+              tools={tools}
+              selectedId={idB}
+              side={resultB}
+              onChange={setIdB}
+              pickerLabel="Search the second AI tool to compare"
+            />
           </div>
-          <ResultColumn
-            tools={tools}
-            selectedId={idB}
-            side={resultB}
-            onChange={setIdB}
-            pickerLabel="Search the second AI tool to compare"
-          />
-        </div>
 
-        {delta !== null && (
-          <p className="cmp-delta" role="status">
-            {Math.abs(delta).toFixed(1)} human-equiv years {delta >= 0 ? 'more' : 'fewer'} for{' '}
-            {tools.find((t) => t.id === idA)?.name ?? idA} than {tools.find((t) => t.id === idB)?.name ?? idB}
-          </p>
-        )}
+          {delta !== null && (
+            <p className="cmp-delta" role="status">
+              {Math.abs(delta).toFixed(1)} human-equiv years {delta >= 0 ? 'more' : 'fewer'} for{' '}
+              {tools.find((t) => t.id === idA)?.name ?? idA} than {tools.find((t) => t.id === idB)?.name ?? idB}
+            </p>
+          )}
 
-        <div className="share-card">
-          <span className="share-card-label">Share this comparison</span>
-          <p className="share-card-text">{shareUrl}</p>
-          <div className="share-card-actions">
-            <button type="button" className="share-btn" onClick={() => void copyToClipboard(shareUrl)}>
-              Copy link
-            </button>
+          <div className="share-card">
+            <span className="share-card-label">Share this comparison</span>
+            <p className="share-card-text">{shareUrl}</p>
+            <div className="share-card-actions">
+              <button type="button" className="share-btn" onClick={() => void copyToClipboard(shareUrl)}>
+                Copy link
+              </button>
+            </div>
           </div>
-        </div>
 
-        <footer className="app-footer">
-          <SourceBadge source={toolsSource} label="tools" />
-          <a className="cmp-back-link" href="/">
-            ← back to calculator
-          </a>
-        </footer>
-      </main>
-    </div>
+          <footer className="app-footer">
+            <SourceBadge source={toolsSource} label="tools" />
+          </footer>
+        </main>
+      </div>
+    </>
   )
 }
