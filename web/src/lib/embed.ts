@@ -1,4 +1,5 @@
 import type { CalcModel } from '../types'
+import { DEFAULT_D_AI_MONTHS, DEFAULT_D_CLASSIC_MONTHS } from './urlParams'
 
 // Mirrors the two modes parseInitialState understands: '/embed?tool=' and
 // '/embed?date='. Never set both — parseInitialState resolves tool+date to
@@ -12,7 +13,13 @@ function escapeAttr(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-export function buildEmbedSnippet(origin: string, target: EmbedTarget, model: CalcModel): string {
+export function buildEmbedSnippet(
+  origin: string,
+  target: EmbedTarget,
+  model: CalcModel,
+  dAiMonths: number = DEFAULT_D_AI_MONTHS,
+  dClassicMonths: number = DEFAULT_D_CLASSIC_MONTHS,
+): string {
   const url = new URL('/embed', origin)
   let title: string
   if (target.mode === 'tool') {
@@ -23,6 +30,10 @@ export function buildEmbedSnippet(origin: string, target: EmbedTarget, model: Ca
     title = `aitime-calc result since ${target.date}`
   }
   url.searchParams.set('model', model)
+  // Only serialize the doubling knobs when tuned away from the defaults, matching
+  // the main page's share URL — so a tuned hero yields a tuned embed, not default numbers.
+  if (dAiMonths !== DEFAULT_D_AI_MONTHS) url.searchParams.set('d_ai_months', String(dAiMonths))
+  if (dClassicMonths !== DEFAULT_D_CLASSIC_MONTHS) url.searchParams.set('d_classic_months', String(dClassicMonths))
   // title= is required for WCAG 4.1.2 (frame-title): a screen reader announces
   // it as the frame's name. It stays in the host page forever once copied.
   return `<iframe src="${url.toString()}" title="${escapeAttr(title)}" width="480" height="640" style="border:0" loading="lazy"></iframe>`

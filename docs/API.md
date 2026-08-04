@@ -220,9 +220,15 @@ GET /api/og?tool=cursor-yolo-mode&date=2026-07-30
 GET /api/og?date=2025-03-14
 ```
 
+**Doubling params** — both modes also accept optional `&d_classic_months=<n>` and `&d_ai_months=<n>` (same knobs as `/api/calc`, defaults `72` and `4.5`), so a shared card reflects the same tuning as the page that generated it. Each must be a positive number or the request is a `400`.
+
+```
+GET /api/og?tool=cursor-yolo-mode&date=2026-07-30&d_ai_months=3&d_classic_months=60
+```
+
 **Response `200`** — `Content-Type: image/png`, binary body.
 
-**Errors `400`** — `{"error": string}`, e.g. `"tool or date is required"`, `"unknown tool: <id>"`, `"unknown model: <value>"`, `"invalid date: <value>"`, `"date <value> is before <tool>'s release date"`, `"date <value> is in the future"` (date-mode only).
+**Errors `400`** — `{"error": string}`, e.g. `"tool or date is required"`, `"unknown tool: <id>"`, `"unknown model: <value>"`, `"invalid date: <value>"`, `"date <value> is before <tool>'s release date"`, `"date <value> is in the future"` (date-mode only), `"d_classic_months must be a positive number"`, `"d_ai_months must be a positive number"`.
 
 ## GET /api/leaderboard
 

@@ -102,6 +102,26 @@ describe('parseInitialState', () => {
     expect(parseInitialState('?model=accelerating').model).toBe('accelerating')
     expect(parseInitialState('?model=bogus').model).toBe('base')
   })
+
+  it('parses valid ?d_ai_months and ?d_classic_months within range', () => {
+    const state = parseInitialState('?d_ai_months=3&d_classic_months=60')
+    expect(state.dAiMonths).toBe(3)
+    expect(state.dClassicMonths).toBe(60)
+  })
+
+  it('treats absent d_ai_months/d_classic_months as null (caller applies default)', () => {
+    const state = parseInitialState('')
+    expect(state.dAiMonths).toBeNull()
+    expect(state.dClassicMonths).toBeNull()
+  })
+
+  it('rejects out-of-range or non-numeric d_ai_months/d_classic_months instead of crashing downstream', () => {
+    expect(parseInitialState('?d_ai_months=0').dAiMonths).toBeNull()
+    expect(parseInitialState('?d_ai_months=100').dAiMonths).toBeNull()
+    expect(parseInitialState('?d_ai_months=lol').dAiMonths).toBeNull()
+    expect(parseInitialState('?d_classic_months=1').dClassicMonths).toBeNull()
+    expect(parseInitialState('?d_classic_months=99999').dClassicMonths).toBeNull()
+  })
 })
 
 describe('parseCompareState', () => {

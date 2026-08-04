@@ -60,6 +60,27 @@ describe('buildOgImageUrl', () => {
     expect(url).toBe('https://aitime-calc-api.fly.dev/api/og?tool=gpt-4o')
   })
 
+  it('forwards doubling params that are inside the UI bounds', () => {
+    process.env.VITE_API_URL = 'https://aitime-calc-api.fly.dev'
+    const url = buildOgImageUrl(new URLSearchParams('tool=gpt-4o&d_ai_months=3&d_classic_months=96'))
+    expect(url).toBe('https://aitime-calc-api.fly.dev/api/og?tool=gpt-4o&d_classic_months=96&d_ai_months=3')
+  })
+
+  it('drops doubling params the page itself would ignore, so the card matches the page', () => {
+    // parseInitialState() rejects these (out of bounds / non-numeric) and renders
+    // the defaults -- forwarding them would unfurl a card contradicting the page.
+    process.env.VITE_API_URL = 'https://aitime-calc-api.fly.dev'
+    for (const query of [
+      'tool=gpt-4o&d_ai_months=0.001',
+      'tool=gpt-4o&d_ai_months=99',
+      'tool=gpt-4o&d_ai_months=abc',
+      'tool=gpt-4o&d_classic_months=1',
+      'tool=gpt-4o&d_classic_months=5000',
+    ]) {
+      expect(buildOgImageUrl(new URLSearchParams(query))).toBe('https://aitime-calc-api.fly.dev/api/og?tool=gpt-4o')
+    }
+  })
+
   it('returns null when tool is absent, even with VITE_API_URL set', () => {
     // /api/og 400s without a tool id -- must not inject a broken og:image
     // that would duplicate/shadow the correct static default in index.html.
