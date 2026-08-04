@@ -79,5 +79,5 @@ export const TOOL_ID_ALIASES: Record<string, string> = {
 }
 
 export function resolveToolId(id: string): string {
-  return TOOL_ID_ALIASES[id] ?? id
+  return Object.hasOwn(TOOL_ID_ALIASES, id) ? TOOL_ID_ALIASES[id] : id
 }

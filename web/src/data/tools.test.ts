@@ -25,6 +25,12 @@ describe('resolveToolId', () => {
   it('passes through an id with no alias unchanged', () => {
     expect(resolveToolId('gpt-4o')).toBe('gpt-4o')
   })
+
+  it('does not leak Object.prototype members for inherited-key ids', () => {
+    for (const id of ['constructor', 'toString', 'valueOf', 'hasOwnProperty', '__proto__']) {
+      expect(resolveToolId(id)).toBe(id)
+    }
+  })
 })
 
 it('DEFAULT_TOOL_ID is a real FALLBACK_TOOLS id', () => {
