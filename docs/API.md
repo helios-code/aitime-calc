@@ -241,10 +241,12 @@ Tools released *after* `as_of` are omitted (not ranked with negative years). `ra
 GET /api/leaderboard?model=accelerating&as_of=2026-01-01
 ```
 
-**Response `200`**
+**Response `200`** — `as_of` and `model` echo the resolved query (same as `/api/timeline` and `/api/compare`).
 
 ```json
 {
+  "as_of": "2026-01-01",
+  "model": "accelerating",
   "leaderboard": [
     {
       "rank": 1,

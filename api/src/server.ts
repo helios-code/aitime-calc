@@ -421,21 +421,15 @@ function buildCalcResponse(q: CalcQuery) {
   };
 }
 
-export function buildLeaderboardResponse(q: LeaderboardQuery): LeaderboardEntry[] {
-  if (q.model !== undefined && q.model !== "base" && q.model !== "accelerating") {
-    throw { status: 400, error: `unknown model: ${q.model}` };
-  }
-  const model: CalcModel = q.model === "accelerating" ? "accelerating" : "base";
+export function buildLeaderboardResponse(q: LeaderboardQuery) {
+  const model = resolveModel(q.model);
+  const { asOfStr, asOf } = resolveAsOf(q.as_of);
 
-  const asOfStr = q.as_of ?? new Date().toISOString().slice(0, 10);
-  const asOf = new Date(`${asOfStr}T00:00:00Z`);
-  if (!isValidDate(asOf)) {
-    throw { status: 400, error: `invalid as_of date: ${asOfStr}` };
-  }
-
-  return TOOLS.map((tool) => ({ tool, release: new Date(`${tool.release_date}T00:00:00Z`) }))
-    .filter(({ release }) => release.getTime() <= asOf.getTime())
-    .map(({ tool, release }) => {
+  // Same unreleased-at-as_of filter as /api/timeline and /api/compare: computeAtem
+  // doesn't clamp, so a not-yet-released tool would score negative years.
+  const leaderboard: LeaderboardEntry[] = TOOLS.filter((tool) => !isUnreleasedAt(tool, asOf))
+    .map((tool) => {
+      const release = new Date(`${tool.release_date}T00:00:00Z`);
       const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
       return {
         tool_id: tool.id,
@@ -446,6 +440,8 @@ export function buildLeaderboardResponse(q: LeaderboardQuery): LeaderboardEntry[
     })
     .sort((a, b) => b.human_equiv_years - a.human_equiv_years)
     .map((entry, i) => ({ rank: i + 1, ...entry }));
+
+  return { as_of: asOfStr, model, leaderboard };
 }
 
 const LOCALHOST_ORIGIN_RE = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
@@ -510,7 +506,7 @@ export function buildServer() {
 
   app.get<{ Querystring: LeaderboardQuery }>("/api/leaderboard", async (req, reply) => {
     try {
-      return { leaderboard: buildLeaderboardResponse(req.query) };
+      return buildLeaderboardResponse(req.query);
     } catch (err: any) {
       if (err?.status && err?.error) {
         reply.code(err.status);
