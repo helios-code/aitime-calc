@@ -85,9 +85,6 @@ function App() {
     if (!releaseDate) return
     let cancelled = false
     setLoading(true)
-    // In live mode, api/src/atem.ts only honors d_ai_months for accelerating
-    // once task 51fb1399 merges; harmless no-op until then (mock mode already
-    // honors it via lib/atem.ts's own acceleratingDoublings).
     fetchCalc({
       release_date: releaseDate,
       as_of: TODAY,

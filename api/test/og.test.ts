@@ -30,6 +30,19 @@ describe("buildOgSvg", () => {
     const svg = buildOgSvg({ tool: longest.id, date: "2026-07-30" });
     expect(svg).toContain(longest.name);
   });
+
+  it("honors d_ai_months/d_classic_months: the card changes when a doubling param does", () => {
+    const base = buildOgSvg({ tool: "cursor-yolo-mode", date: "2026-07-30" });
+    // A smaller AI-doubling period compounds faster, so the human-equivalent hero differs.
+    const fasterAi = buildOgSvg({ tool: "cursor-yolo-mode", date: "2026-07-30", d_ai_months: 1 });
+    expect(fasterAi).not.toBe(base);
+    const widerClassic = buildOgSvg({ tool: "cursor-yolo-mode", date: "2026-07-30", d_classic_months: 144 });
+    expect(widerClassic).not.toBe(base);
+  });
+
+  it("400s (throws) on d_ai_months=0", () => {
+    expect(() => buildOgSvg({ tool: "cursor-yolo-mode", date: "2026-07-30", d_ai_months: 0 })).toThrow();
+  });
 });
 
 describe("buildOgSvg date-mode (no tool)", () => {

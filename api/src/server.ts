@@ -44,18 +44,6 @@ interface OgQuery {
   d_ai_months?: string | number;
 }
 
-function resolveAtemParams(q: OgQuery) {
-  const dClassicMonths = q.d_classic_months !== undefined ? Number(q.d_classic_months) : DEFAULT_PARAMS.dClassicMonths;
-  const dAiMonths = q.d_ai_months !== undefined ? Number(q.d_ai_months) : DEFAULT_PARAMS.dAiMonths;
-  if (!Number.isFinite(dClassicMonths) || dClassicMonths <= 0) {
-    throw { status: 400, error: "d_classic_months must be a positive number" };
-  }
-  if (!Number.isFinite(dAiMonths) || dAiMonths <= 0) {
-    throw { status: 400, error: "d_ai_months must be a positive number" };
-  }
-  return { dClassicMonths, dAiMonths };
-}
-
 // Shared by /api/timeline and /api/compare: the /api/calc knobs that still make
 // sense when the release date comes from the dataset rather than the query.
 interface AtemQuery {
@@ -179,7 +167,7 @@ function buildDateModeOgSvg(dateStr: string, modelParam: string | undefined, ate
 }
 
 export function buildOgSvg(q: OgQuery): string {
-  const atemParams = resolveAtemParams(q);
+  const atemParams = resolveDoublingParams(q);
   const toolId = q.tool;
   if (!toolId) {
     if (!q.date) {
@@ -257,7 +245,7 @@ function resolveAsOf(raw: string | undefined): { asOfStr: string; asOf: Date } {
   return { asOfStr, asOf };
 }
 
-function resolveDoublingParams(q: AtemQuery | CalcQuery) {
+function resolveDoublingParams(q: AtemQuery | CalcQuery | OgQuery) {
   const dClassicMonths = q.d_classic_months !== undefined ? Number(q.d_classic_months) : DEFAULT_PARAMS.dClassicMonths;
   const dAiMonths = q.d_ai_months !== undefined ? Number(q.d_ai_months) : DEFAULT_PARAMS.dAiMonths;
   if (!Number.isFinite(dClassicMonths) || dClassicMonths <= 0) {
