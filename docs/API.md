@@ -67,6 +67,8 @@ Computes the ATEM (AI-Time Equivalence Model) result — see `docs/METHODOLOGY.m
 | `d_classic_months` | number > 0 | no | defaults to `72` |
 | `d_ai_months` | number > 0 | no | defaults to `4.5` |
 
+An `as_of` earlier than the release date is rejected with a `400` (it would score negative human-equivalent years), matching the same guard on `/api/timeline`, `/api/compare`, `/api/leaderboard`, and `/api/og`. `as_of` equal to the release date is valid and returns zero elapsed time.
+
 **Response `200`** (`GET /api/calc?tool_id=cursor-yolo-mode&as_of=2026-07-30`)
 
 ```json
@@ -95,6 +97,7 @@ Computes the ATEM (AI-Time Equivalence Model) result — see `docs/METHODOLOGY.m
 { "error": "unknown tool_id: nope" }
 { "error": "invalid release date: not-a-date" }
 { "error": "d_classic_months must be a positive number" }
+{ "error": "as_of 2022-01-01 is before release date 2023-03-14" }
 ```
 
 ## GET /api/timeline

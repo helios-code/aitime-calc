@@ -66,6 +66,37 @@ describe("GET /api/calc", () => {
     const res = await app.inject({ method: "GET", url: "/api/calc?tool_id=nope" });
     expect(res.statusCode).toBe(400);
   });
+
+  it("400s when as_of is before the release date (no negative years)", async () => {
+    const app = buildServer();
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/calc?release=2023-03-14&as_of=2022-01-01",
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toMatch(/before release date/);
+  });
+
+  it("400s when as_of is before a tool_id's release date", async () => {
+    const app = buildServer();
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/calc?tool_id=cursor-yolo-mode&as_of=2019-01-01",
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("allows as_of == release (boundary), yielding zero elapsed", async () => {
+    const app = buildServer();
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/calc?release=2023-03-14&as_of=2023-03-14",
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.elapsed.days).toBe(0);
+    expect(body.human_equiv_years).toBe(0);
+  });
 });
 
 describe("POST /api/calc", () => {
