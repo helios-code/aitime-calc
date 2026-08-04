@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { fetchCalc, fetchTools } from './lib/api'
+import { buildEmbedSnippet } from './lib/embed'
 import { parseInitialState } from './lib/urlParams'
 import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from './data/tools'
 import type { CalcModel, CalcResult, Tool } from './types'
@@ -63,6 +64,18 @@ function App() {
     return url.toString()
   }, [mode, selectedToolId, customDate, model])
 
+  // /embed reads the same ?tool= / ?date= contract as this page, so the embed
+  // action follows whichever mode is active.
+  const embedSnippet = useMemo(
+    () =>
+      buildEmbedSnippet(
+        window.location.origin,
+        mode === 'tool' ? { mode: 'tool', toolId: selectedToolId } : { mode: 'date', date: customDate },
+        model,
+      ),
+    [mode, selectedToolId, customDate, model],
+  )
+
   useEffect(() => {
     if (!releaseDate) return
     let cancelled = false
@@ -109,7 +122,7 @@ function App() {
 
         {result && (
           <section className="share-section">
-            <ShareCard result={result} toolName={selectedTool?.name} shareUrl={shareUrl} />
+            <ShareCard result={result} toolName={selectedTool?.name} shareUrl={shareUrl} embedSnippet={embedSnippet} />
           </section>
         )}
 

@@ -38,4 +38,12 @@ describe('getRoute', () => {
   it('matches /compare/ with trailing slash', () => {
     expect(getRoute('/compare/')).toBe('compare')
   })
+
+  it('matches /embed', () => {
+    expect(getRoute('/embed')).toBe('embed')
+  })
+
+  it('matches /embed/ with trailing slash', () => {
+    expect(getRoute('/embed/')).toBe('embed')
+  })
 })
