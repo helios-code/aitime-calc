@@ -1,0 +1,16 @@
+{
+  "name": "aitime-calc-qa-visual",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone Playwright visual QA harness for aitime-calc. Targets the RUNNING app by URL; never imports or modifies web/ or api/. Scoped devDep so it never collides with web/package.json.",
+  "scripts": {
+    "baseline": "node baseline.mjs",
+    "overflow": "node overflow.mjs",
+    "check": "node baseline.mjs && node overflow.mjs",
+    "install:browser": "playwright install chromium"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}
