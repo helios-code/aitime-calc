@@ -16,26 +16,6 @@
   text-align: center;
 }
 
-.brand {
-  font-family: var(--mono);
-  font-size: var(--text-md);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent-2);
-  font-weight: 600;
-}
-
-.timeline-link {
-  color: var(--accent-2);
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.timeline-link:hover,
-.timeline-link:focus-visible {
-  text-decoration: underline;
-}
-
 .tagline {
   font-size: var(--text-lg);
   color: var(--text-dim);
@@ -717,21 +697,6 @@ code {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 1px 5px;
-}
-
-.methodology-back {
-  display: inline-block;
-  align-self: flex-start;
-  color: var(--accent-2);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  text-decoration: none;
-  padding: var(--space-1) 0;
-}
-
-.methodology-back:hover,
-.methodology-back:focus-visible {
-  text-decoration: underline;
 }
 
 .methodology-title {

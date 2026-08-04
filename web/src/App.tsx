@@ -14,6 +14,7 @@ import { ResultHero } from './components/ResultHero'
 import { ShareCard } from './components/ShareCard'
 import { MethodologyExplainer } from './components/MethodologyExplainer'
 import { SourceBadge } from './components/SourceBadge'
+import { SiteNav } from './components/SiteNav'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -105,54 +106,53 @@ function App() {
   }, [releaseDate, model, dAiMonths, dClassicMonths])
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <span className="brand">aitime-calc</span>
-        <p className="tagline">How much human progress did that AI release actually compress?</p>
-        <a className="timeline-link" href="/timeline">
-          See every tool on the timeline →
-        </a>
-      </header>
+    <>
+      <SiteNav />
+      <div className="app">
+        <header className="app-header">
+          <h1 className="tagline">How much human progress did that AI release compress?</h1>
+        </header>
 
-      <main className="app-main">
-        <section className="controls">
-          <ModeTabs mode={mode} onChange={setMode} />
-          {mode === 'tool' ? (
-            <ToolPicker tools={tools} selectedId={selectedToolId} onChange={setSelectedToolId} />
-          ) : (
-            <DatePicker value={customDate} onChange={setCustomDate} />
-          )}
-          <ModelToggle model={model} onChange={setModel} />
-          <AdvancedParams
-            dAiMonths={dAiMonths}
-            dClassicMonths={dClassicMonths}
-            onChangeDAiMonths={setDAiMonths}
-            onChangeDClassicMonths={setDClassicMonths}
-          />
-        </section>
-
-        <section className={loading ? 'result-panel result-panel--loading' : 'result-panel'}>
-          {result ? (
-            <ResultHero result={result} toolName={selectedTool?.name} />
-          ) : (
-            <div className="result-skeleton" aria-hidden="true" />
-          )}
-        </section>
-
-        {result && (
-          <section className="share-section">
-            <ShareCard result={result} toolName={selectedTool?.name} shareUrl={shareUrl} embedSnippet={embedSnippet} />
+        <main className="app-main">
+          <section className="controls">
+            <ModeTabs mode={mode} onChange={setMode} />
+            {mode === 'tool' ? (
+              <ToolPicker tools={tools} selectedId={selectedToolId} onChange={setSelectedToolId} />
+            ) : (
+              <DatePicker value={customDate} onChange={setCustomDate} />
+            )}
+            <ModelToggle model={model} onChange={setModel} />
+            <AdvancedParams
+              dAiMonths={dAiMonths}
+              dClassicMonths={dClassicMonths}
+              onChangeDAiMonths={setDAiMonths}
+              onChangeDClassicMonths={setDClassicMonths}
+            />
           </section>
-        )}
 
-        {result && <MethodologyExplainer result={result} />}
-      </main>
+          <section className={loading ? 'result-panel result-panel--loading' : 'result-panel'}>
+            {result ? (
+              <ResultHero result={result} toolName={selectedTool?.name} />
+            ) : (
+              <div className="result-skeleton" aria-hidden="true" />
+            )}
+          </section>
 
-      <footer className="app-footer">
-        <SourceBadge source={toolsSource} label="Tools" />
-        <SourceBadge source={calcSource} label="Calc" />
-      </footer>
-    </div>
+          {result && (
+            <section className="share-section">
+              <ShareCard result={result} toolName={selectedTool?.name} shareUrl={shareUrl} embedSnippet={embedSnippet} />
+            </section>
+          )}
+
+          {result && <MethodologyExplainer result={result} />}
+        </main>
+
+        <footer className="app-footer">
+          <SourceBadge source={toolsSource} label="Tools" />
+          <SourceBadge source={calcSource} label="Calc" />
+        </footer>
+      </div>
+    </>
   )
 }
 

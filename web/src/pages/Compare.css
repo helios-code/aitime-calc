@@ -21,12 +21,25 @@
   align-items: center;
 }
 
+/* Circular divider chip rather than free-floating text: reads as an
+   intentional "A vs B" pivot, and the token top-margin (was a raw 60px
+   magic number) lines it up with the result figures below the pickers. */
 .cmp-vs {
   align-self: center;
-  margin-top: 60px;
+  justify-self: center;
+  margin-top: var(--space-16);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
   font-family: var(--mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-2xs);
   font-weight: 700;
+  letter-spacing: 0.08em;
   color: var(--text-dim);
   text-transform: uppercase;
 }
@@ -37,12 +50,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   text-align: center;
-  padding: 28px var(--space-5);
+  padding: var(--space-8) var(--space-5);
   background: linear-gradient(180deg, var(--bg-alt), transparent);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
 }
 
 .cmp-figure {
@@ -78,14 +92,14 @@
 }
 
 .cmp-meta dt {
-  font-size: 10px;
+  font-size: var(--text-3xs);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--text-dim);
 }
 
 .cmp-meta dd {
-  margin: 2px 0 0;
+  margin: var(--space-1) 0 0;
   font-family: var(--mono);
   font-size: var(--text-xs);
   color: var(--text-h);
@@ -115,25 +129,6 @@
   font-size: var(--text-md);
   color: var(--text-h);
   font-weight: 600;
-}
-
-/* Own class, not Leaderboard's .lb-back-link: every page's CSS lands in one
-   bundle, so redeclaring that selector here overrode the leaderboard's own
-   back link too. display/padding/transition are spelled out because they used
-   to arrive from the .lb-back-link rule in Leaderboard.css — the rendering is
-   unchanged, it just no longer depends on another page's stylesheet. */
-.cmp-back-link {
-  display: inline-block;
-  padding: var(--space-1) 0;
-  font-size: var(--text-xs);
-  color: var(--text-dim);
-  text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-in-out);
-}
-
-.cmp-back-link:hover,
-.cmp-back-link:focus-visible {
-  color: var(--accent-2);
 }
 
 @media (max-width: 640px) {

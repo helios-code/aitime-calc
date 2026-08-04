@@ -1,20 +1,19 @@
 .timeline-page .app-main {
-  gap: 24px;
+  gap: var(--space-6);
 }
 
-.timeline-nav a {
-  color: var(--text-dim);
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.timeline-nav a:hover,
-.timeline-nav a:focus-visible {
-  color: var(--accent-2);
+/* The chart is a fixed 960-unit viewBox scene. On phones that whole scene
+   scales down and the axis labels become unreadable, so the chart scrolls
+   horizontally inside its own container below its min-width — the same pattern
+   the leaderboard table uses. The page never scrolls sideways; only this box. */
+.timeline-chart-wrap {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .timeline-chart {
   width: 100%;
+  min-width: 600px;
   height: auto;
   overflow: visible;
 }
@@ -27,13 +26,13 @@
 .timeline-gridline text {
   fill: var(--text-dim);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 .timeline-x-label {
   fill: var(--text-dim);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 .timeline-axis {
@@ -50,15 +49,19 @@
   opacity: 0.6;
 }
 
-.timeline-point circle {
+.timeline-hit {
+  fill: transparent;
+}
+
+.timeline-dot {
   fill: var(--accent-2);
   stroke: var(--bg);
   stroke-width: 2;
-  transition: r 0.15s ease, fill 0.15s ease;
+  transition: r var(--duration-fast) var(--ease-in-out), fill var(--duration-fast) var(--ease-in-out);
 }
 
-.timeline-point:hover circle,
-.timeline-point:focus-visible circle {
+.timeline-point:hover .timeline-dot,
+.timeline-point:focus-visible .timeline-dot {
   fill: var(--accent);
   r: 9;
 }
@@ -70,14 +73,7 @@
 }
 
 .timeline-caption {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--text-dim);
   text-align: center;
-}
-
-@media (max-width: 520px) {
-  .timeline-gridline text,
-  .timeline-x-label {
-    font-size: 9px;
-  }
 }
