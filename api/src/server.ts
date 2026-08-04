@@ -395,6 +395,14 @@ function buildCalcResponse(q: CalcQuery) {
   }
 
   const { asOfStr, asOf } = resolveAsOf(q.as_of);
+  // computeAtem doesn't clamp elapsed time, so an as_of before the release date
+  // would score negative human-equivalent years. Reject it — same guard the
+  // sibling endpoints (og/timeline/compare/leaderboard) already apply to
+  // not-yet-released tools, so /api/calc stops being the one endpoint that
+  // returns a nonsensical negative 200.
+  if (asOf.getTime() < release.getTime()) {
+    throw { status: 400, error: `as_of ${asOfStr} is before release date ${releaseStr}` };
+  }
   // Unchanged from before these helpers existed: /api/calc silently treats an
   // unrecognized model as "base" (resolveModel, used by the newer endpoints,
   // 400s instead) — a documented, already-shipped contract.
