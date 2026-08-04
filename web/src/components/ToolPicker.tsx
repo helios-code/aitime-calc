@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import type { Tool } from '../types'
 import { filterAndGroupTools, flattenGroups } from '../lib/toolFilter'
 
@@ -6,19 +6,27 @@ interface Props {
   tools: Tool[]
   selectedId: string
   onChange: (id: string) => void
+  /** Names this picker for screen readers. Pass a distinct label whenever a
+      page renders more than one picker (Compare does) — two controls sharing
+      one accessible name are indistinguishable in a rotor listing. */
+  label?: string
 }
 
-function optionId(id: string): string {
-  return `tool-option-${id}`
-}
-
-export function ToolPicker({ tools, selectedId, onChange }: Props) {
+export function ToolPicker({ tools, selectedId, onChange, label = 'Search known AI tools' }: Props) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const rootRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  /* Every id below is per-instance: a second picker on the same page would
+     otherwise duplicate #tool-listbox and every #tool-option-*, and both
+     inputs' aria-controls/aria-activedescendant would resolve to the FIRST
+     picker's nodes. .tool-listbox styling keys off the class, not the id. */
+  const uid = useId()
+  const listboxId = `tool-listbox-${uid}`
+  const optionId = (id: string) => `tool-option-${uid}-${id}`
 
   const selected = tools.find((t) => t.id === selectedId)
 
@@ -89,9 +97,9 @@ export function ToolPicker({ tools, selectedId, onChange }: Props) {
           role="combobox"
           aria-expanded={open}
           aria-autocomplete="list"
-          aria-controls="tool-listbox"
+          aria-controls={listboxId}
           aria-activedescendant={open && activeTool ? optionId(activeTool.id) : undefined}
-          aria-label="Search known AI tools"
+          aria-label={label}
           placeholder="Search AI tools…"
           value={open ? query : (selected?.name ?? '')}
           onFocus={() => {
@@ -110,7 +118,7 @@ export function ToolPicker({ tools, selectedId, onChange }: Props) {
           </p>
         )}
         {open && flatOrder.length > 0 && (
-          <ul className="tool-listbox" id="tool-listbox" role="listbox" aria-label="AI tools" ref={listRef}>
+          <ul className="tool-listbox" id={listboxId} role="listbox" aria-label={label} ref={listRef}>
             {groups.map(([category, items]) => (
               <li key={category} role="group" aria-label={category} className="tool-group">
                 <span className="tool-group-label" aria-hidden="true">

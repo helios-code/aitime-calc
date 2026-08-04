@@ -35,16 +35,18 @@ function ResultColumn({
   selectedId,
   side,
   onChange,
+  pickerLabel,
 }: {
   tools: Tool[]
   selectedId: string
   side: Side
   onChange: (id: string) => void
+  pickerLabel: string
 }) {
   const tool = tools.find((t) => t.id === selectedId)
   return (
     <div className="cmp-col">
-      <ToolPicker tools={tools} selectedId={selectedId} onChange={onChange} />
+      <ToolPicker tools={tools} selectedId={selectedId} onChange={onChange} label={pickerLabel} />
       <div className="cmp-result">
         {side.result && side.toolId === selectedId ? (
           <>
@@ -154,11 +156,23 @@ export default function Compare() {
 
       <main className="app-main">
         <div className="cmp-columns">
-          <ResultColumn tools={tools} selectedId={idA} side={resultA} onChange={setIdA} />
+          <ResultColumn
+            tools={tools}
+            selectedId={idA}
+            side={resultA}
+            onChange={setIdA}
+            pickerLabel="Search the first AI tool to compare"
+          />
           <div className="cmp-vs" aria-hidden="true">
             vs
           </div>
-          <ResultColumn tools={tools} selectedId={idB} side={resultB} onChange={setIdB} />
+          <ResultColumn
+            tools={tools}
+            selectedId={idB}
+            side={resultB}
+            onChange={setIdB}
+            pickerLabel="Search the second AI tool to compare"
+          />
         </div>
 
         {delta !== null && (
@@ -180,7 +194,7 @@ export default function Compare() {
 
         <footer className="app-footer">
           <SourceBadge source={toolsSource} label="tools" />
-          <a className="lb-back-link" href="/">
+          <a className="cmp-back-link" href="/">
             ← back to calculator
           </a>
         </footer>

@@ -26,4 +26,16 @@ describe('getRoute', () => {
   it('matches /leaderboard/ with trailing slash', () => {
     expect(getRoute('/leaderboard/')).toBe('leaderboard')
   })
+
+  it('matches /timeline', () => {
+    expect(getRoute('/timeline')).toBe('timeline')
+  })
+
+  it('matches /compare', () => {
+    expect(getRoute('/compare')).toBe('compare')
+  })
+
+  it('matches /compare/ with trailing slash', () => {
+    expect(getRoute('/compare/')).toBe('compare')
+  })
 })

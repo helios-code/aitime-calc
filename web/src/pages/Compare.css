@@ -3,7 +3,7 @@
 }
 
 .cmp-subtitle {
-  font-size: 16px;
+  font-size: var(--text-base);
   color: var(--text-dim);
 }
 
@@ -11,13 +11,13 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: start;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .cmp-col {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
   align-items: center;
 }
 
@@ -25,7 +25,7 @@
   align-self: center;
   margin-top: 60px;
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 700;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -39,7 +39,7 @@
   align-items: center;
   gap: 10px;
   text-align: center;
-  padding: 28px 20px;
+  padding: 28px var(--space-5);
   background: linear-gradient(180deg, var(--bg-alt), transparent);
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -57,14 +57,14 @@
 }
 
 .cmp-unit {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .cmp-comparison {
-  font-size: 15px;
+  font-size: var(--text-md);
   color: var(--text-h);
   font-weight: 600;
 }
@@ -73,8 +73,8 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 8px 0 0;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
 }
 
 .cmp-meta dt {
@@ -87,7 +87,7 @@
 .cmp-meta dd {
   margin: 2px 0 0;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--text-h);
   font-weight: 700;
 }
@@ -95,7 +95,7 @@
 .cmp-skeleton {
   width: 100%;
   min-height: 160px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(100deg, var(--surface) 30%, var(--bg-alt) 50%, var(--surface) 70%);
   background-size: 200% 100%;
   animation: cmp-skeleton-sweep 1.4s ease-in-out infinite;
@@ -112,19 +112,27 @@
 
 .cmp-delta {
   text-align: center;
-  font-size: 15px;
+  font-size: var(--text-md);
   color: var(--text-h);
   font-weight: 600;
 }
 
-.lb-back-link {
-  font-size: 13px;
+/* Own class, not Leaderboard's .lb-back-link: every page's CSS lands in one
+   bundle, so redeclaring that selector here overrode the leaderboard's own
+   back link too. display/padding/transition are spelled out because they used
+   to arrive from the .lb-back-link rule in Leaderboard.css — the rendering is
+   unchanged, it just no longer depends on another page's stylesheet. */
+.cmp-back-link {
+  display: inline-block;
+  padding: var(--space-1) 0;
+  font-size: var(--text-xs);
   color: var(--text-dim);
   text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-in-out);
 }
 
-.lb-back-link:hover,
-.lb-back-link:focus-visible {
+.cmp-back-link:hover,
+.cmp-back-link:focus-visible {
   color: var(--accent-2);
 }
 
