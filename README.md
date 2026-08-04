@@ -22,3 +22,8 @@ Run `bash scripts/gate-check.sh` before `qa-submit` — it mirrors the reviewer'
 
 This line was added to exercise the QA gate end to end: PR creation, the
 reviewer verdict mirrored onto the PR, and the merge gated on GitHub checks.
+
+## Gate end-to-end test (App path)
+
+Added to exercise the full chain with niwa-gate installed: PR body, the
+reviewer verdict as a real GitHub review, merge gated on checks.
