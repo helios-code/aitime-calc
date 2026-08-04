@@ -643,7 +643,8 @@ code {
   padding: var(--space-1) 0;
 }
 
-.methodology-back:hover {
+.methodology-back:hover,
+.methodology-back:focus-visible {
   text-decoration: underline;
 }
 

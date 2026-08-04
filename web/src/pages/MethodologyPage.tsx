@@ -232,6 +232,9 @@ humanEquivYears  = (months * multiplier) / 12
         <a className="methodology-back" href="/">
           ← Back to calculator
         </a>
+        <a className="methodology-back" href="/leaderboard">
+          See every tool ranked →
+        </a>
       </footer>
     </div>
   )
