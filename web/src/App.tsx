@@ -77,8 +77,10 @@ function App() {
         window.location.origin,
         mode === 'tool' ? { mode: 'tool', toolId: selectedToolId } : { mode: 'date', date: customDate },
         model,
+        dAiMonths,
+        dClassicMonths,
       ),
-    [mode, selectedToolId, customDate, model],
+    [mode, selectedToolId, customDate, model, dAiMonths, dClassicMonths],
   )
 
   useEffect(() => {

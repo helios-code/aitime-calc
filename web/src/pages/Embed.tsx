@@ -45,7 +45,13 @@ export default function Embed() {
   useEffect(() => {
     if (!releaseDate) return
     let cancelled = false
-    fetchCalc({ release_date: releaseDate, as_of: TODAY, model: initial.model }).then(({ result, source }) => {
+    fetchCalc({
+      release_date: releaseDate,
+      as_of: TODAY,
+      model: initial.model,
+      d_ai_months: initial.dAiMonths ?? undefined,
+      d_classic_months: initial.dClassicMonths ?? undefined,
+    }).then(({ result, source }) => {
       if (cancelled) return
       setResult(result)
       setSource(source)

@@ -55,4 +55,22 @@ describe('buildEmbedSnippet', () => {
       .search
     expect(parseInitialState(dateSearch)).toMatchObject({ mode: 'date', date: '2024-05-13', model: 'base' })
   })
+
+  it('omits the doubling params when they are at their defaults', () => {
+    const snippet = buildEmbedSnippet('https://x.example', { mode: 'tool', toolId: 'gpt-4o' }, 'base')
+    expect(snippet).not.toContain('d_ai_months')
+    expect(snippet).not.toContain('d_classic_months')
+  })
+
+  it('serializes tuned doubling params and round-trips them through parseInitialState', () => {
+    const snippet = buildEmbedSnippet('https://x.example', { mode: 'tool', toolId: 'gpt-4o' }, 'base', 3, 60)
+    expect(snippet).toContain('d_ai_months=3')
+    expect(snippet).toContain('d_classic_months=60')
+    expect(parseInitialState(new URL(srcOf(snippet)).search)).toMatchObject({
+      mode: 'tool',
+      tool: 'gpt-4o',
+      dAiMonths: 3,
+      dClassicMonths: 60,
+    })
+  })
 })
