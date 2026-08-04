@@ -224,6 +224,39 @@ GET /api/og?date=2025-03-14
 
 **Errors `400`** — `{"error": string}`, e.g. `"tool or date is required"`, `"unknown tool: <id>"`, `"unknown model: <value>"`, `"invalid date: <value>"`, `"date <value> is before <tool>'s release date"`, `"date <value> is in the future"` (date-mode only).
 
-## Not yet implemented
+## GET /api/leaderboard
 
-There is no *ranking* endpoint (`/api/leaderboard` does not exist on `main`) — the web app's leaderboard page computes rankings client-side from `GET /api/tools` instead. `GET /api/timeline` is the batch scorer, but it returns tools in release order, not ranked by human-equivalent years. If a ranking endpoint ships later, document it here.
+Every tool in the dataset ranked by human-equivalent years compressed since its release — the batch form of `GET /api/calc`, computed server-side with `DEFAULT_PARAMS`.
+
+**Query**
+
+| param | required | default | notes |
+| --- | --- | --- | --- |
+| `model` | no | `base` | `base` or `accelerating` |
+| `as_of` | no | today (UTC) | `YYYY-MM-DD`; the date rankings are computed against |
+
+Tools released *after* `as_of` are omitted (not ranked with negative years). `rank` is `1`-based over the tools that survive that filter, ordered by `human_equiv_years` descending; `human_equiv_years` is rounded to 2 decimals.
+
+```
+GET /api/leaderboard?model=accelerating&as_of=2026-01-01
+```
+
+**Response `200`** — `as_of` and `model` echo the resolved query (same as `/api/timeline` and `/api/compare`).
+
+```json
+{
+  "as_of": "2026-01-01",
+  "model": "accelerating",
+  "leaderboard": [
+    {
+      "rank": 1,
+      "tool_id": "gpt-2",
+      "name": "GPT-2",
+      "human_equiv_years": 87.84,
+      "release_date": "2019-02-14"
+    }
+  ]
+}
+```
+
+**Errors `400`** — `{"error": string}`: `"unknown model: <value>"`, `"invalid as_of date: <value>"`.

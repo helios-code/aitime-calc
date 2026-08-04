@@ -55,6 +55,19 @@ interface CompareQuery extends AtemQuery {
   vs?: string;
 }
 
+interface LeaderboardQuery {
+  model?: string;
+  as_of?: string;
+}
+
+interface LeaderboardEntry {
+  rank: number;
+  tool_id: string;
+  name: string;
+  human_equiv_years: number;
+  release_date: string;
+}
+
 function isValidDate(d: Date): boolean {
   return !Number.isNaN(d.getTime());
 }
@@ -408,6 +421,29 @@ function buildCalcResponse(q: CalcQuery) {
   };
 }
 
+export function buildLeaderboardResponse(q: LeaderboardQuery) {
+  const model = resolveModel(q.model);
+  const { asOfStr, asOf } = resolveAsOf(q.as_of);
+
+  // Same unreleased-at-as_of filter as /api/timeline and /api/compare: computeAtem
+  // doesn't clamp, so a not-yet-released tool would score negative years.
+  const leaderboard: LeaderboardEntry[] = TOOLS.filter((tool) => !isUnreleasedAt(tool, asOf))
+    .map((tool) => {
+      const release = new Date(`${tool.release_date}T00:00:00Z`);
+      const result = computeAtem(release, asOf, model, DEFAULT_PARAMS);
+      return {
+        tool_id: tool.id,
+        name: tool.name,
+        human_equiv_years: Number(result.humanEquivYears.toFixed(2)),
+        release_date: tool.release_date,
+      };
+    })
+    .sort((a, b) => b.human_equiv_years - a.human_equiv_years)
+    .map((entry, i) => ({ rank: i + 1, ...entry }));
+
+  return { as_of: asOfStr, model, leaderboard };
+}
+
 const LOCALHOST_ORIGIN_RE = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
 export function buildServer() {
@@ -459,6 +495,18 @@ export function buildServer() {
   app.get<{ Querystring: CompareQuery }>("/api/compare", async (req, reply) => {
     try {
       return buildCompareResponse(req.query);
+    } catch (err: any) {
+      if (err?.status && err?.error) {
+        reply.code(err.status);
+        return { error: err.error };
+      }
+      throw err;
+    }
+  });
+
+  app.get<{ Querystring: LeaderboardQuery }>("/api/leaderboard", async (req, reply) => {
+    try {
+      return buildLeaderboardResponse(req.query);
     } catch (err: any) {
       if (err?.status && err?.error) {
         reply.code(err.status);
