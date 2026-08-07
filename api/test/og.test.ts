@@ -74,6 +74,45 @@ describe("buildOgSvg date-mode (no tool)", () => {
   });
 });
 
+describe("buildOgSvg localization (lang param)", () => {
+  it("renders French labels for the tool-mode card when lang=fr", () => {
+    const fr = buildOgSvg({ tool: "cursor-yolo-mode", date: "2026-07-30", lang: "fr" });
+    expect(fr).toContain("modèle base"); // model label, FR
+    expect(fr).toContain(" ans"); // human-equiv hero unit, FR ("N ans …")
+    expect(fr).not.toContain("model</text>"); // no English "… model" label
+  });
+
+  it("renders French labels + accented month for the date-mode card", () => {
+    // August → "août" in fr-FR: exercises an accented glyph (û) end to end.
+    const fr = buildOgSvg({ date: "2022-08-15", lang: "fr" });
+    expect(fr).toContain("date de sortie"); // eyebrow, FR
+    expect(fr).toContain("août"); // localized month with accent
+    expect(fr).toContain("Le "); // hero prefix, FR
+  });
+
+  it("localizes the accelerating model label", () => {
+    const fr = buildOgSvg({ date: "2022-11-30", model: "accelerating", lang: "fr" });
+    expect(fr).toContain("modèle accéléré");
+  });
+
+  it("falls back to English for an invalid/unknown lang", () => {
+    const bogus = buildOgSvg({ date: "2022-11-30", lang: "de" });
+    const en = buildOgSvg({ date: "2022-11-30" });
+    expect(bogus).toBe(en);
+    expect(bogus).toContain("release date");
+    expect(bogus).toContain("base model");
+  });
+
+  it("leaves the English card byte-for-byte unchanged when lang is absent (no regression)", () => {
+    // Guards the EN default path: omitting lang must produce exactly the prior output.
+    const svg = buildOgSvg({ tool: "cursor-yolo-mode", date: "2026-07-30" });
+    expect(svg).toContain("base model");
+    expect(svg).toContain("model</text>");
+    expect(svg).not.toContain("modèle");
+    expect(svg).toBe(buildOgSvg({ tool: "cursor-yolo-mode", date: "2026-07-30", lang: "en" }));
+  });
+});
+
 describe("renderOgPixels", () => {
   it("paints non-background pixels using the embedded font (catches a blank-text regression)", () => {
     // A missing/broken embedded font still yields a valid, background-colored PNG —
@@ -107,6 +146,30 @@ describe("renderOgPixels", () => {
       img.free();
       expect(nonBackgroundPixels, `${id} rendered blank`).toBeGreaterThan(500);
     }
+  });
+
+  // The committed subset was Basic-Latin only; a FR card ("date de sortie",
+  // "modèle base", accented months like "août") would render blank glyphs if the
+  // subset wasn't extended. Assert the FR card paints AND differs from its EN
+  // twin — proving the accented/localized text actually reached the canvas.
+  function countNonBg(img: { pixels: Uint8Array; free: () => void }): number {
+    const pixels = img.pixels;
+    const bg = { r: 0x0b, g: 0x0f, b: 0x19 };
+    let n = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i] !== bg.r || pixels[i + 1] !== bg.g || pixels[i + 2] !== bg.b) n++;
+    }
+    img.free();
+    return n;
+  }
+
+  it("paints accented French glyphs from the extended subset (regression on FR OG cards)", () => {
+    const frPixels = countNonBg(renderOgPixels({ date: "2022-08-15", lang: "fr" }));
+    const enPixels = countNonBg(renderOgPixels({ date: "2022-08-15" }));
+    expect(frPixels, "FR card rendered blank — subset missing accents?").toBeGreaterThan(500);
+    // Different copy (and accented glyphs) → a materially different render, not a
+    // silent fallback to the English card.
+    expect(frPixels).not.toBe(enPixels);
   });
 });
 
