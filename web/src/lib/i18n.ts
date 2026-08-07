@@ -48,6 +48,18 @@ function resolveEnvLocale(): Locale {
 // The active locale for this page load.
 export const LOCALE: Locale = resolveEnvLocale()
 
+// Keep the document's <html lang> in sync with the active locale so screen
+// readers announce the right language. index.html ships lang="en"; under FR that
+// would mislead assistive tech. The toggle does a full navigation, so setting
+// this once at module load covers every locale switch — but the function is
+// exported and reusable should an in-place switch ever be added.
+export function syncDocumentLang(locale: Locale): void {
+  if (typeof document === 'undefined') return
+  document.documentElement.lang = locale
+}
+
+syncDocumentLang(LOCALE)
+
 // Persist the choice and reload. A full navigation (not in-place state) is the
 // deliberate trade: this app renders from module-load constants with no context
 // provider, so reloading is the simplest way to guarantee no mixed-language
