@@ -3,13 +3,14 @@ import '../App.css'
 import './TimelinePage.css'
 import { fetchTools } from '../lib/api'
 import { buildTimelinePoints } from '../lib/timelineData'
-import { decodeTimeline, encodeTimeline, syncSearch } from '../lib/urlState'
+import { appendLang, decodeTimeline, encodeTimeline, syncSearch } from '../lib/urlState'
 import { FALLBACK_TOOLS } from '../data/tools'
 import { ModelToggle } from '../components/ModelToggle'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
 import { SiteFooter } from '../components/SiteFooter'
-import { t } from '../lib/i18n'
+import { ShareLinkButton } from '../components/ShareLinkButton'
+import { LOCALE, t } from '../lib/i18n'
 import type { CalcModel, Tool } from '../types'
 
 const initialModel = decodeTimeline(window.location.search).model
@@ -59,6 +60,11 @@ export function TimelinePage() {
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
+
+  const shareUrl = useMemo(() => {
+    const { origin, pathname } = window.location
+    return `${origin}${pathname}${appendLang(encodeTimeline({ model }), LOCALE)}`
+  }, [model])
 
   const points = useMemo(() => buildTimelinePoints(tools, TODAY, model), [tools, model])
 
@@ -144,6 +150,14 @@ export function TimelinePage() {
           </div>
 
           <p className="timeline-caption">{t.timeline.caption}</p>
+
+          <div className="share-card">
+            <span className="share-card-label">{t.timeline.shareLabel}</span>
+            <p className="share-card-text">{shareUrl}</p>
+            <div className="share-card-actions">
+              <ShareLinkButton url={shareUrl} />
+            </div>
+          </div>
         </main>
 
         <footer className="app-footer">

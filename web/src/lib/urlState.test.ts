@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  appendLang,
   decodeCompare,
   decodeTimeline,
   encodeCompare,
@@ -56,5 +57,30 @@ describe('timeline url state', () => {
   it('keeps base out of the URL and degrades a bogus model to base', () => {
     expect(encodeTimeline({ model: 'base' })).toBe('')
     expect(decodeTimeline('?model=nope').model).toBe('base')
+  })
+})
+
+describe('appendLang (shareable-link language)', () => {
+  it('leaves the search untouched for the default English locale', () => {
+    expect(appendLang('?tool=gpt-4o&vs=gpt-4', 'en')).toBe('?tool=gpt-4o&vs=gpt-4')
+    expect(appendLang('', 'en')).toBe('')
+  })
+
+  it('appends lang for a non-default locale, preserving existing params', () => {
+    expect(appendLang('?tool=gpt-4o&vs=gpt-4', 'fr')).toBe('?tool=gpt-4o&vs=gpt-4&lang=fr')
+    expect(appendLang('', 'fr')).toBe('?lang=fr')
+  })
+
+  it('builds a share URL identical to the current urlState encoding (+ lang)', () => {
+    // The share button must encode exactly what the address bar carries.
+    const cmp = encodeCompare({ a: 'gpt-4o', b: 'gpt-4', model: 'accelerating' })
+    expect(appendLang(cmp, 'en')).toBe(cmp)
+    expect(appendLang(cmp, 'fr')).toBe(`${cmp}&lang=fr`)
+
+    const tl = encodeTimeline({ model: 'accelerating' })
+    expect(appendLang(tl, 'en')).toBe(tl)
+    expect(appendLang(tl, 'fr')).toBe(`${tl}&lang=fr`)
+    // Timeline on base + English → a bare permalink, no query at all.
+    expect(appendLang(encodeTimeline({ model: 'base' }), 'en')).toBe('')
   })
 })

@@ -185,6 +185,7 @@ const en = {
     chartAria:
       'Human-equivalent years compressed since each tool’s release, plotted against release date. Older releases show more compressed human-equivalent time.',
     toolsLabel: 'Tools',
+    shareLabel: 'Share this view',
     pointAria: (name: string, date: string, years: string) =>
       `${name}, released ${date}: ${years} human-equivalent years compressed since. Open this result.`,
   },
@@ -333,6 +334,7 @@ const fr: Strings = {
     chartAria:
       'Années de temps humain équivalent compressées depuis la sortie de chaque outil, en fonction de la date de sortie. Les sorties plus anciennes montrent un temps humain équivalent plus compressé.',
     toolsLabel: 'Outils',
+    shareLabel: 'Partager cette vue',
     pointAria: (name: string, date: string, years: string) =>
       `${name}, sorti le ${date} : ${years} années de temps humain équivalent compressées depuis. Ouvrir ce résultat.`,
   },
