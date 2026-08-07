@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { isLocale, resolveLocale } from './i18n'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { isLocale, resolveLocale, syncDocumentLang } from './i18n'
 
 describe('resolveLocale precedence: param > stored > navigator > en', () => {
   it('honours a valid ?lang param above everything else', () => {
@@ -27,6 +27,39 @@ describe('resolveLocale precedence: param > stored > navigator > en', () => {
     expect(resolveLocale({ param: 'de', stored: 'fr', navigator: 'en' })).toBe('fr')
     expect(resolveLocale({ param: 'xx', stored: 'yy', navigator: 'fr-CA' })).toBe('fr')
     expect(resolveLocale({ param: '', stored: '', navigator: '' })).toBe('en')
+  })
+})
+
+describe('syncDocumentLang', () => {
+  it('sets document.documentElement.lang for both locales', () => {
+    syncDocumentLang('fr')
+    expect(document.documentElement.lang).toBe('fr')
+    syncDocumentLang('en')
+    expect(document.documentElement.lang).toBe('en')
+  })
+})
+
+describe('document lang syncs at module load', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    document.documentElement.lang = 'en'
+    localStorage.clear()
+  })
+  afterEach(() => {
+    window.history.replaceState({}, '', '/')
+    localStorage.clear()
+  })
+
+  it('sets <html lang> to fr on a ?lang=fr permalink load', async () => {
+    window.history.replaceState({}, '', '/?lang=fr')
+    await import('./i18n')
+    expect(document.documentElement.lang).toBe('fr')
+  })
+
+  it('sets <html lang> to en on a ?lang=en permalink load', async () => {
+    window.history.replaceState({}, '', '/?lang=en')
+    await import('./i18n')
+    expect(document.documentElement.lang).toBe('en')
   })
 })
 
