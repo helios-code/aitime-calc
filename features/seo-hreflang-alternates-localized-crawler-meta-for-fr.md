@@ -8,12 +8,7 @@
 ## 1. Product Brief
 
 ### Acceptance Criteria
-- [ ] 1. Crawler meta middleware emits link rel=alternate hreflang=en/fr (+x-default=en) with correct ?lang URLs on every indexable surface (embed excluded)
-- [ ] 2. FR requests (?lang=fr) get FR title/description meta; EN output unchanged when lang absent
-- [ ] 3. og:locale set per locale (en_US/fr_FR) alongside existing og tags
-- [ ] 4. Canonical URL logic stays consistent with hreflang (no canonical pointing at the other locale)
-- [ ] 5. Sitemap (if present; add if trivially absent) lists both locale URLs or uses xhtml:link alternates — pick, justify in .niwa-decision.md
-- [ ] 6. api+web tests green + new middleware tests for hreflang/meta both locales; gate-check PASS
+_(untyped ticket — no acceptance criteria)_
 
 ## 2. Root cause & decisions
 
@@ -89,8 +84,6 @@ clean — hreflang/canonical/og:locale both locales, embed excluded, dynamic rob
 ## 5. Timeline
 
 - round 1 → **approve** (review-8b28ecd3-a562-43b2-b0d9-5eb4de51a080)
-
-**Approve-with-findings (follow-up):** clean — hreflang/canonical/og:locale both locales, embed excluded, dynamic robots+sitemap origin-derived, EN unchanged, 138 tests + build green
 
 ---
 _Auto-assembled by the niwa scribe from the Q&A gate. Task `8b28ecd3-a562-43b2-b0d9-5eb4de51a080`._
