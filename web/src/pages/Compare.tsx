@@ -10,6 +10,7 @@ import { ToolPicker } from '../components/ToolPicker'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
 import { SiteFooter } from '../components/SiteFooter'
+import { t } from '../lib/i18n'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 const FALLBACK_B = FALLBACK_TOOLS.find((t) => t.id !== DEFAULT_TOOL_ID)?.id ?? DEFAULT_TOOL_ID
@@ -56,23 +57,23 @@ function ResultColumn({
         {side.result && side.toolId === selectedId ? (
           <>
             <div className="cmp-figure">{side.result.human_equiv_years.toFixed(1)}</div>
-            <div className="cmp-unit">human-equiv years</div>
+            <div className="cmp-unit">{t.compare.unit}</div>
             <p className="cmp-comparison">{side.result.comparison_line}</p>
             <dl className="cmp-meta">
               <div>
-                <dt>Released</dt>
+                <dt>{t.compare.released}</dt>
                 <dd>{tool?.release_date ?? '—'}</dd>
               </div>
               <div>
-                <dt>Elapsed</dt>
+                <dt>{t.compare.elapsed}</dt>
                 <dd>{side.result.elapsed.human}</dd>
               </div>
               <div>
-                <dt>AI doublings</dt>
+                <dt>{t.compare.aiDoublings}</dt>
                 <dd>{side.result.ai_doublings.toFixed(1)}</dd>
               </div>
             </dl>
-            <SourceBadge source={side.source} label="Calc" />
+            <SourceBadge source={side.source} label={t.compare.calcLabel} />
           </>
         ) : (
           <div className="cmp-skeleton" />
@@ -83,7 +84,7 @@ function ResultColumn({
 }
 
 export default function Compare() {
-  useDocumentTitle('Compare AI tools — human-equivalent time | aitime-calc')
+  useDocumentTitle(t.compare.docTitle)
 
   const [tools, setTools] = useState<Tool[]>(FALLBACK_TOOLS)
   const [toolsSource, setToolsSource] = useState<'live' | 'mock'>('mock')
@@ -183,8 +184,8 @@ export default function Compare() {
       <SiteNav />
       <div className="app cmp-page">
         <header className="app-header">
-          <h1 className="tagline">Compare two tools</h1>
-          <p className="cmp-subtitle">Side-by-side human-equivalent time.</p>
+          <h1 className="tagline">{t.compare.title}</h1>
+          <p className="cmp-subtitle">{t.compare.subtitle}</p>
         </header>
 
         <main className="app-main">
@@ -194,39 +195,43 @@ export default function Compare() {
               selectedId={idA}
               side={resultA}
               onChange={setIdA}
-              pickerLabel="Search the first AI tool to compare"
+              pickerLabel={t.compare.pickerA}
             />
             <div className="cmp-vs" aria-hidden="true">
-              vs
+              {t.compare.vs}
             </div>
             <ResultColumn
               tools={tools}
               selectedId={idB}
               side={resultB}
               onChange={setIdB}
-              pickerLabel="Search the second AI tool to compare"
+              pickerLabel={t.compare.pickerB}
             />
           </div>
 
           {delta !== null && (
             <p className="cmp-delta" role="status">
-              {Math.abs(delta).toFixed(1)} human-equiv years {delta >= 0 ? 'more' : 'fewer'} for{' '}
-              {tools.find((t) => t.id === idA)?.name ?? idA} than {tools.find((t) => t.id === idB)?.name ?? idB}
+              {t.compare.delta(
+                Math.abs(delta).toFixed(1),
+                delta >= 0,
+                tools.find((tool) => tool.id === idA)?.name ?? idA,
+                tools.find((tool) => tool.id === idB)?.name ?? idB,
+              )}
             </p>
           )}
 
           <div className="share-card">
-            <span className="share-card-label">Share this comparison</span>
+            <span className="share-card-label">{t.compare.shareLabel}</span>
             <p className="share-card-text">{shareUrl}</p>
             <div className="share-card-actions">
               <button type="button" className="share-btn" onClick={() => void copyToClipboard(shareUrl)}>
-                Copy link
+                {t.compare.copyLink}
               </button>
             </div>
           </div>
 
           <footer className="app-footer">
-            <SourceBadge source={toolsSource} label="tools" />
+            <SourceBadge source={toolsSource} label={t.compare.toolsLabel} />
           </footer>
         </main>
         <SiteFooter />

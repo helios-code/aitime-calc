@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { copyToClipboard } from '../lib/clipboard'
+import { t } from '../lib/i18n'
 import type { CalcResult } from '../types'
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 
 function buildShareText(result: CalcResult, toolName?: string): string {
   const subject = toolName ?? result.input.release_date
-  return `${subject} = ~${result.human_equiv_years.toFixed(1)} human-equivalent years compressed into ${result.elapsed.human}. ${result.comparison_line}`
+  return t.share.shareText(subject, result.human_equiv_years.toFixed(1), result.elapsed.human, result.comparison_line)
 }
 
 type CopyState = 'idle' | 'copied-text' | 'copied-link' | 'copied-embed' | 'failed'
@@ -32,24 +33,24 @@ export function ShareCard({ result, toolName, shareUrl, embedSnippet }: Props) {
 
   return (
     <div className="share-card">
-      <p className="share-card-label">Share this result</p>
+      <p className="share-card-label">{t.share.label}</p>
       <p className="share-card-text">{buildShareText(result, toolName)}</p>
       <div className="share-card-actions">
         <button type="button" className="share-btn" onClick={() => copy('text')}>
-          {state === 'copied-text' ? 'Copied ✓' : 'Copy result'}
+          {state === 'copied-text' ? t.share.copied : t.share.copyResult}
         </button>
         <button type="button" className="share-btn share-btn--ghost" onClick={() => copy('link')}>
-          {state === 'copied-link' ? 'Copied ✓' : 'Copy link'}
+          {state === 'copied-link' ? t.share.copied : t.share.copyLink}
         </button>
         {embedSnippet && (
           <button type="button" className="share-btn share-btn--ghost" onClick={() => copy('embed')}>
-            {state === 'copied-embed' ? 'Copied ✓' : 'Copy embed'}
+            {state === 'copied-embed' ? t.share.copied : t.share.copyEmbed}
           </button>
         )}
       </div>
       {state === 'failed' && (
         <p className="share-card-status" role="status" aria-live="polite">
-          Couldn't copy — select the text above and copy manually.
+          {t.share.failed}
         </p>
       )}
     </div>
