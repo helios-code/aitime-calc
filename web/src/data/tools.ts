@@ -57,6 +57,8 @@ export const FALLBACK_TOOLS: Tool[] = [
   { id: 'gpt-5-6', name: 'GPT-5.6 (Luna / Terra / Sol)', vendor: 'OpenAI', release_date: '2026-07-09', category: 'reasoning model', note: 'Three-tier family after a late-June limited preview.' },
   { id: 'gemini-3-6-flash', name: 'Gemini 3.6 Flash', vendor: 'Google DeepMind', release_date: '2026-07-21', category: 'LLM', note: 'Shipped alongside Gemini 3.5 Flash-Lite.' },
   { id: 'claude-opus-5', name: 'Claude Opus 5', vendor: 'Anthropic', release_date: '2026-07-24', category: 'LLM', note: 'Flagship Claude 5 for complex agentic coding.' },
+  { id: 'kimi-k3', name: 'Kimi K3', vendor: 'Moonshot AI', release_date: '2026-07-27', category: 'open-weights LLM', note: 'Largest open-weight model to date: 2.8T MoE, Modified MIT license.' },
+  { id: 'qwen-3-8-max', name: 'Qwen3.8-Max', vendor: 'Alibaba', release_date: '2026-08-03', category: 'LLM', note: 'Alibaba\'s largest model: 2.4T MoE, multimodal, 1M-token context.' },
 ]
 
 export const DEFAULT_TOOL_ID = 'cursor-yolo-mode'
