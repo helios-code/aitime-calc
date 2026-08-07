@@ -30,17 +30,22 @@ confirming the literal value is unchanged; `npm run build` green; `oxlint` exit 
 ## 3. Files changed
 
 ```
-.niwa-decision.md       | 42 ++++++++++++------------------------------
- web/src/lib/urlState.ts | 13 +++++++------
- 2 files changed, 19 insertions(+), 36 deletions(-)
+.niwa-decision.md                       | 17 ++++++++++--
+ features/0dc5e1ad-followup-langparam.md | 46 +++++++++++++++++++++++++++++++++
+ web/src/lib/urlState.ts                 | 13 +++++-----
+ 3 files changed, 68 insertions(+), 8 deletions(-)
 ```
 
 ## 4. QA Log
 
-_(no review round yet)_
+### Round 1 — ✅ APPROVED by review-0dc5e1ad-followup-langparam @ `5ccddaeeb`
+appendLang imports LANG_PARAM; no cycle, value unchanged, tests+tsc green — clean
 
 ## 5. Timeline
 
+- round 1 → **approve** (review-0dc5e1ad-followup-langparam)
+
+**Approve-with-findings (follow-up):** appendLang imports LANG_PARAM; no cycle, value unchanged, tests+tsc green — clean
 
 ---
 _Auto-assembled by the niwa scribe from the Q&A gate. Task `0dc5e1ad-followup-langparam`._
