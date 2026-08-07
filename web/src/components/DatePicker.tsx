@@ -1,3 +1,5 @@
+import { t } from '../lib/i18n'
+
 interface Props {
   value: string
   onChange: (value: string) => void
@@ -9,7 +11,7 @@ export function DatePicker({ value, onChange }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   return (
     <div className="date-picker">
-      <label htmlFor="release-date">Release date</label>
+      <label htmlFor="release-date">{t.datePicker.label}</label>
       <input
         id="release-date"
         type="date"

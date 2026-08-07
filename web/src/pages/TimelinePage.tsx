@@ -9,6 +9,7 @@ import { ModelToggle } from '../components/ModelToggle'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
 import { SiteFooter } from '../components/SiteFooter'
+import { t } from '../lib/i18n'
 import type { CalcModel, Tool } from '../types'
 
 const initialModel = decodeTimeline(window.location.search).model
@@ -85,7 +86,7 @@ export function TimelinePage() {
       <SiteNav />
       <div className="app timeline-page">
         <header className="app-header">
-          <h1 className="tagline">Every tool in the dataset, on one human-equivalent-time axis</h1>
+          <h1 className="tagline">{t.timeline.title}</h1>
           <ModelToggle model={model} onChange={setModel} />
         </header>
 
@@ -95,7 +96,7 @@ export function TimelinePage() {
               className="timeline-chart"
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
               role="group"
-              aria-label="Human-equivalent years compressed since each tool's release, plotted against release date. Older releases show more compressed human-equivalent time."
+              aria-label={t.timeline.chartAria}
             >
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
                 {yTicks.map((yr) => (
@@ -129,7 +130,7 @@ export function TimelinePage() {
                     key={p.tool.id}
                     href={`/?tool=${encodeURIComponent(p.tool.id)}`}
                     className="timeline-point"
-                    aria-label={`${p.tool.name}, released ${p.tool.release_date}: ${p.humanEquivYears.toFixed(1)} human-equivalent years compressed since. Open this result.`}
+                    aria-label={t.timeline.pointAria(p.tool.name, p.tool.release_date, p.humanEquivYears.toFixed(1))}
                   >
                     {/* transparent, wider hit circle so the tap area clears the
                         6px visual dot; the visible .timeline-dot stays small. */}
@@ -142,14 +143,11 @@ export function TimelinePage() {
             </svg>
           </div>
 
-          <p className="timeline-caption">
-            Y-axis (log scale): human-equivalent years compressed since each tool shipped, as of today. X-axis: release date. Click a
-            point to open that tool's full result.
-          </p>
+          <p className="timeline-caption">{t.timeline.caption}</p>
         </main>
 
         <footer className="app-footer">
-          <SourceBadge source={source} label="Tools" />
+          <SourceBadge source={source} label={t.timeline.toolsLabel} />
         </footer>
         <SiteFooter />
       </div>

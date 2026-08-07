@@ -1,3 +1,4 @@
+import { t } from '../lib/i18n'
 import type { CalcResult } from '../types'
 
 interface Props {
@@ -7,28 +8,32 @@ interface Props {
 export function MethodologyExplainer({ result }: Props) {
   return (
     <details className="methodology">
-      <summary>How is this calculated? (ATEM methodology)</summary>
+      <summary>{t.explainer.summary}</summary>
       <div className="methodology-body">
         <p>{result.methodology_note}</p>
         <dl className="methodology-params">
           <div>
-            <dt>Classic tech-generation length</dt>
-            <dd>{result.params.d_classic_months} months</dd>
+            <dt>{t.explainer.classicLen}</dt>
+            <dd>
+              {result.params.d_classic_months} {t.explainer.months}
+            </dd>
           </div>
           <div>
-            <dt>AI capability doubling time</dt>
-            <dd>{result.params.d_ai_months} months</dd>
+            <dt>{t.explainer.aiDoubling}</dt>
+            <dd>
+              {result.params.d_ai_months} {t.explainer.months}
+            </dd>
           </div>
           <div>
-            <dt>Multiplier</dt>
+            <dt>{t.explainer.multiplier}</dt>
             <dd>{result.params.multiplier}×</dd>
           </div>
         </dl>
         <p className="methodology-sources">
-          Sources: {result.sources.join(' · ')}
+          {t.explainer.sourcesLabel}: {result.sources.join(' · ')}
         </p>
         <a className="methodology-full-link" href="/methodology">
-          Full methodology, worked example &amp; limitations →
+          {t.explainer.fullLink}
         </a>
       </div>
     </details>
