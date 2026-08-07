@@ -27,3 +27,5 @@ reviewer verdict mirrored onto the PR, and the merge gated on GitHub checks.
 
 This change exists to watch the gate do the whole chain by itself:
 open a real PR with a readable body, review it, gate the merge on checks.
+
+// title-check probe
