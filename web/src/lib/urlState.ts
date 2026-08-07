@@ -81,6 +81,20 @@ export function encodeTimeline(state: { model: CalcModel }): string {
   return toSearch([['model', state.model === 'accelerating' ? 'accelerating' : null]])
 }
 
+// ---- Shareable-link language ----
+
+// Append the active locale as ?lang so a shared permalink opens in the same
+// language the sharer is viewing. English is the default and left implicit —
+// same rule as encode* dropping the default model/as_of, keeping URLs clean.
+// `locale` is 'lang' per i18n.LANG_PARAM (kept a literal here so urlState stays
+// dependency-free and purely testable). Never throws.
+export function appendLang(search: string, locale: string): string {
+  if (locale === 'en') return search
+  const params = new URLSearchParams(search)
+  params.set('lang', locale)
+  return `?${params.toString()}`
+}
+
 // ---- History wiring ----
 
 // Write `search` (a '?...'-prefixed string or '') to the address bar without a
