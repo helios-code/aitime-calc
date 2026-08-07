@@ -108,6 +108,11 @@ export function buildOgImageUrl(searchParams: URLSearchParams): string | null {
   if (date) url.searchParams.set('date', date)
   if (dClassicMonths) url.searchParams.set('d_classic_months', dClassicMonths)
   if (dAiMonths) url.searchParams.set('d_ai_months', dAiMonths)
+  // Forward the active locale so a FR permalink unfurls a FR card. Only 'fr' is
+  // forwarded — English is /api/og's default, so an EN page keeps a lang-free
+  // image URL (no regression to existing EN og:image tags). ?lang matches the
+  // web i18n LANG_PARAM contract; /api/og falls back to EN on anything else.
+  if (searchParams.get('lang') === 'fr') url.searchParams.set('lang', 'fr')
   return url.toString()
 }
 
