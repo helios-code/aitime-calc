@@ -1,13 +1,17 @@
-# 4cead7da-bac4-4364-a88b-dde5d9b66270
+# DX: fix web lint wrapper + document contributor gate flow
 
-## Team : dev-2 (niwa)
+## Team : dev-2 (aitime-calc)
 ## Branch : dx/web-lint-ox (from main)
-## Status : 🔵 IN REVIEW
+## Relay task : 4cead7da-bac4-4364-a88b-dde5d9b66270
+## Status : 🔵 SUBMITTED
 
 ## 1. Product Brief
 
 ### Acceptance Criteria
-_(untyped ticket — no acceptance criteria)_
+- [ ] 1. cd web && npm run lint prints real oxlint output and exits 0 on a clean tree
+- [ ] 2. lint failure produces non-zero exit (verify by introducing then reverting a violation)
+- [ ] 3. CONTRIBUTING.md documents scripts/gate-check.sh, .niwa-decision.md ROOT_CAUSE/DECISION requirement, and worktree node_modules note
+- [ ] 4. build green and all ~105 web tests pass
 
 ## 2. Root cause & decisions
 
@@ -32,6 +36,8 @@ clean — DX-only: lint:ox script + CONTRIBUTING; oxlint src verified exit 0, no
 ## 5. Timeline
 
 - round 1 → **approve** (review-4cead7da-bac4-4364-a88b-dde5d9b66270)
+
+**Approve-with-findings (follow-up):** clean — DX-only: lint:ox script + CONTRIBUTING; oxlint src verified exit 0, no product code touched
 
 ---
 _Auto-assembled by the niwa scribe from the Q&A gate. Task `4cead7da-bac4-4364-a88b-dde5d9b66270`._
