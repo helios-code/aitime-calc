@@ -6,6 +6,7 @@ import { SORT_LABELS, sortEntries, type SortDir, type SortKey } from '../lib/lea
 import { downloadTextFile, exportFilename, toCsv, toJson } from '../lib/export'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
+import { SiteFooter } from '../components/SiteFooter'
 import type { CalcModel, LeaderboardEntry } from '../types'
 
 const PAGE_TITLE = 'AI tool leaderboard — human-equivalent years compressed | aitime-calc'
@@ -190,6 +191,7 @@ export default function Leaderboard() {
             <SourceBadge source={source} label="leaderboard" />
           </footer>
         </main>
+        <SiteFooter />
       </div>
     </>
   )

@@ -64,3 +64,18 @@ export async function fetchCalc(params: CalcParams): Promise<CalcResultWithSourc
     }
   }
 }
+
+// The API's own version, per the {status:'ok', version, uptime_s} health contract.
+// Returns null on any failure (unreachable, timeout, non-200, malformed payload) so
+// the footer degrades to an em-dash instead of crashing or spamming the console.
+export async function fetchHealth(): Promise<string | null> {
+  try {
+    const res = await withTimeout(fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(TIMEOUT_MS) }))
+    if (!res.ok) throw new Error(`status ${res.status}`)
+    const data = await res.json()
+    if (typeof data?.version !== 'string' || data.version.length === 0) throw new Error('missing version')
+    return data.version
+  } catch {
+    return null
+  }
+}

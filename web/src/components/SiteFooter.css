@@ -1,0 +1,24 @@
+.site-footer {
+  max-width: 960px;
+  margin: var(--space-8) auto 0;
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+}
+
+.site-footer-brand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-footer-version {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

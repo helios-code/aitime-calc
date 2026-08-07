@@ -6,6 +6,7 @@ import { buildTimelinePoints } from '../lib/timelineData'
 import { FALLBACK_TOOLS } from '../data/tools'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
+import { SiteFooter } from '../components/SiteFooter'
 import type { Tool } from '../types'
 
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -122,6 +123,7 @@ export function TimelinePage() {
         <footer className="app-footer">
           <SourceBadge source={source} label="Tools" />
         </footer>
+        <SiteFooter />
       </div>
     </>
   )

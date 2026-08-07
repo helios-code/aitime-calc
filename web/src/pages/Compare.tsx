@@ -9,6 +9,7 @@ import type { CalcResult, Tool } from '../types'
 import { ToolPicker } from '../components/ToolPicker'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
+import { SiteFooter } from '../components/SiteFooter'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 const FALLBACK_B = FALLBACK_TOOLS.find((t) => t.id !== DEFAULT_TOOL_ID)?.id ?? DEFAULT_TOOL_ID
@@ -198,6 +199,7 @@ export default function Compare() {
             <SourceBadge source={toolsSource} label="tools" />
           </footer>
         </main>
+        <SiteFooter />
       </div>
     </>
   )
