@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import '../App.css'
 import './Compare.css'
 import { fetchCalc, fetchTools } from '../lib/api'
 import { copyToClipboard } from '../lib/clipboard'
-import { parseCompareState } from '../lib/urlParams'
+import { decodeCompare, encodeCompare, syncSearch } from '../lib/urlState'
 import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from '../data/tools'
 import type { CalcResult, Tool } from '../types'
 import { ToolPicker } from '../components/ToolPicker'
@@ -14,7 +14,10 @@ import { SiteFooter } from '../components/SiteFooter'
 const TODAY = new Date().toISOString().slice(0, 10)
 const FALLBACK_B = FALLBACK_TOOLS.find((t) => t.id !== DEFAULT_TOOL_ID)?.id ?? DEFAULT_TOOL_ID
 
-const initial = parseCompareState(window.location.search)
+const initial = decodeCompare(window.location.search)
+// Compare has no as_of picker; a permalink may still carry one, and it must
+// round-trip. Absent → today.
+const AS_OF = initial.asOf ?? TODAY
 
 interface Side {
   toolId: string
@@ -107,7 +110,7 @@ export default function Compare() {
     const tool = tools.find((t) => t.id === idA)
     if (!tool) return
     let cancelled = false
-    fetchCalc({ release_date: tool.release_date, as_of: TODAY, model: initial.model, tool_id: tool.id }).then(
+    fetchCalc({ release_date: tool.release_date, as_of: AS_OF, model: initial.model, tool_id: tool.id }).then(
       ({ result, source }) => {
         if (cancelled) return
         setResultA({ toolId: idA, result, source })
@@ -122,7 +125,7 @@ export default function Compare() {
     const tool = tools.find((t) => t.id === idB)
     if (!tool) return
     let cancelled = false
-    fetchCalc({ release_date: tool.release_date, as_of: TODAY, model: initial.model, tool_id: tool.id }).then(
+    fetchCalc({ release_date: tool.release_date, as_of: AS_OF, model: initial.model, tool_id: tool.id }).then(
       ({ result, source }) => {
         if (cancelled) return
         setResultB({ toolId: idB, result, source })
@@ -134,13 +137,40 @@ export default function Compare() {
   }, [idB, tools])
 
   const shareUrl = useMemo(() => {
-    const url = new URL(window.location.href)
-    url.search = ''
-    url.searchParams.set('tool', idA)
-    url.searchParams.set('vs', idB)
-    if (initial.model === 'accelerating') url.searchParams.set('model', initial.model)
-    return url.toString()
+    const { origin, pathname } = window.location
+    return `${origin}${pathname}${encodeCompare({ a: idA, b: idB, model: initial.model, asOf: initial.asOf })}`
   }, [idA, idB])
+
+  // Keep the address bar in lockstep with the current pair so what's shown is
+  // always the copy-pasteable permalink, and push one history entry per change
+  // so Back/Forward walks the comparisons the user viewed. Skip the mount run:
+  // the URL already reflects `initial`, so pushing there would add a duplicate
+  // entry that swallows one Back press.
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
+    const next = encodeCompare({ a: idA, b: idB, model: initial.model, asOf: initial.asOf })
+    // Skip when the URL already matches — the change came from Back/Forward
+    // (we wrote that exact URL), or it's a no-op. Pushing there would strand
+    // the user by re-forwarding the state they just left.
+    if (next === window.location.search) return
+    syncSearch(next, 'push')
+  }, [idA, idB])
+
+  // Back/Forward restored a prior URL — re-read the pair from it. Unknown ids
+  // degrade to the same defaults as a cold load.
+  useEffect(() => {
+    const onPop = () => {
+      const s = decodeCompare(window.location.search)
+      setIdA(s.a ?? DEFAULT_TOOL_ID)
+      setIdB(s.b ?? FALLBACK_B)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
 
   const delta = useMemo(() => {
     if (!resultA.result || !resultB.result) return null
