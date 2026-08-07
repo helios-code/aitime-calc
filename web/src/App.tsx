@@ -16,6 +16,7 @@ import { MethodologyExplainer } from './components/MethodologyExplainer'
 import { SourceBadge } from './components/SourceBadge'
 import { SiteNav } from './components/SiteNav'
 import { SiteFooter } from './components/SiteFooter'
+import { t } from './lib/i18n'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -111,7 +112,7 @@ function App() {
       <SiteNav />
       <div className="app">
         <header className="app-header">
-          <h1 className="tagline">How much human progress did that AI release compress?</h1>
+          <h1 className="tagline">{t.home.tagline}</h1>
         </header>
 
         <main className="app-main">
@@ -149,8 +150,8 @@ function App() {
         </main>
 
         <footer className="app-footer">
-          <SourceBadge source={toolsSource} label="Tools" />
-          <SourceBadge source={calcSource} label="Calc" />
+          <SourceBadge source={toolsSource} label={t.home.toolsLabel} />
+          <SourceBadge source={calcSource} label={t.home.calcLabel} />
         </footer>
         <SiteFooter />
       </div>

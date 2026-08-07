@@ -7,6 +7,7 @@ import { DEFAULT_TOOL_ID, FALLBACK_TOOLS } from '../data/tools'
 import type { CalcResult, Tool } from '../types'
 import { ResultHero } from '../components/ResultHero'
 import { SourceBadge } from '../components/SourceBadge'
+import { t } from '../lib/i18n'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -14,7 +15,7 @@ const initial = parseInitialState(window.location.search)
 
 export default function Embed() {
   useEffect(() => {
-    document.title = 'aitime-calc — embedded result'
+    document.title = t.embed.docTitle
   }, [])
 
   const [tools, setTools] = useState<Tool[]>(FALLBACK_TOOLS)
@@ -66,7 +67,7 @@ export default function Embed() {
       {result ? (
         <>
           <ResultHero result={result} toolName={selectedTool?.name} />
-          <SourceBadge source={source} label="Calc" />
+          <SourceBadge source={source} label={t.embed.calcLabel} />
         </>
       ) : (
         <div className="result-skeleton embed-skeleton" aria-hidden="true" />

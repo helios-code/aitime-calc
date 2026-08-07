@@ -1,4 +1,5 @@
 import type { CalcModel } from '../types'
+import { t } from '../lib/i18n'
 
 interface Props {
   model: CalcModel
@@ -7,14 +8,14 @@ interface Props {
 
 export function ModelToggle({ model, onChange }: Props) {
   return (
-    <div className="model-toggle" role="tablist" aria-label="Calculation model">
+    <div className="model-toggle" role="tablist" aria-label={t.modelToggle.ariaLabel}>
       <button
         role="tab"
         aria-selected={model === 'base'}
         className={model === 'base' ? 'model-btn active' : 'model-btn'}
         onClick={() => onChange('base')}
       >
-        Base
+        {t.modelToggle.base}
       </button>
       <button
         role="tab"
@@ -22,7 +23,7 @@ export function ModelToggle({ model, onChange }: Props) {
         className={model === 'accelerating' ? 'model-btn active' : 'model-btn'}
         onClick={() => onChange('accelerating')}
       >
-        Accelerating
+        {t.modelToggle.accelerating}
       </button>
     </div>
   )

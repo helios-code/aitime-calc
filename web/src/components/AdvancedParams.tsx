@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { commitBoundedNumber } from '../lib/boundedNumber'
+import { t } from '../lib/i18n'
 import {
   D_AI_MONTHS_MAX,
   D_AI_MONTHS_MIN,
@@ -68,10 +69,13 @@ export function AdvancedParams({ dAiMonths, dClassicMonths, onChangeDAiMonths, o
 
   return (
     <details className="advanced-params">
-      <summary>Advanced assumptions{!isDefault && <span className="advanced-badge">edited</span>}</summary>
+      <summary>
+        {t.advanced.summary}
+        {!isDefault && <span className="advanced-badge">{t.advanced.edited}</span>}
+      </summary>
       <div className="advanced-fields">
         <div className="advanced-field">
-          <label htmlFor="d-ai-months">AI doubling time (months)</label>
+          <label htmlFor="d-ai-months">{t.advanced.aiLabel}</label>
           <BoundedNumberInput
             id="d-ai-months"
             step="0.1"
@@ -82,7 +86,7 @@ export function AdvancedParams({ dAiMonths, dClassicMonths, onChangeDAiMonths, o
           />
         </div>
         <div className="advanced-field">
-          <label htmlFor="d-classic-months">Classic tech-generation length (months)</label>
+          <label htmlFor="d-classic-months">{t.advanced.classicLabel}</label>
           <BoundedNumberInput
             id="d-classic-months"
             step="1"
@@ -101,7 +105,7 @@ export function AdvancedParams({ dAiMonths, dClassicMonths, onChangeDAiMonths, o
               onChangeDClassicMonths(DEFAULT_D_CLASSIC_MONTHS)
             }}
           >
-            Reset to defaults
+            {t.advanced.reset}
           </button>
         )}
       </div>

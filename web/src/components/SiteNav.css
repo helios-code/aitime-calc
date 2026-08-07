@@ -72,3 +72,41 @@
   color: var(--text-h);
   background: var(--surface);
 }
+
+/* Language switch sits at the far right of the bar. margin-left:auto pushes it
+   past the scrollable links row without needing a spacer element. */
+.lang-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+
+.lang-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  transition: color var(--duration-fast) var(--ease-in-out), background var(--duration-fast) var(--ease-in-out);
+}
+
+.lang-btn:hover,
+.lang-btn:focus-visible {
+  color: var(--text-h);
+}
+
+.lang-btn.active {
+  color: var(--text-h);
+  background: var(--surface);
+}

@@ -2,16 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import '../App.css'
 import './Leaderboard.css'
 import { fetchLeaderboard } from '../lib/leaderboardApi'
-import { SORT_LABELS, sortEntries, type SortDir, type SortKey } from '../lib/leaderboardSort'
+import { sortEntries, type SortDir, type SortKey } from '../lib/leaderboardSort'
 import { downloadTextFile, exportFilename, toCsv, toJson } from '../lib/export'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
 import { SiteFooter } from '../components/SiteFooter'
+import { t } from '../lib/i18n'
 import type { CalcModel, LeaderboardEntry } from '../types'
 
-const PAGE_TITLE = 'AI tool leaderboard — human-equivalent years compressed | aitime-calc'
-const PAGE_DESCRIPTION =
-  'Every AI tool ranked by how much human-equivalent time it compressed, from GPT-2 to the present.'
+const PAGE_TITLE = t.leaderboard.pageTitle
+const PAGE_DESCRIPTION = t.leaderboard.pageDescription
 // Single source of truth: the model the table is ranked with is the model the
 // export is stamped with.
 const LEADERBOARD_MODEL: CalcModel = 'base'
@@ -89,7 +89,7 @@ export default function Leaderboard() {
     const contents = kind === 'csv' ? toCsv(sorted, meta) : toJson(sorted, meta)
     const mimeType = kind === 'csv' ? 'text/csv;charset=utf-8' : 'application/json;charset=utf-8'
     const ok = downloadTextFile(exportFilename(kind, asOf), contents, mimeType)
-    setExportError(ok ? null : 'Download blocked by the browser. Check its download settings and try again.')
+    setExportError(ok ? null : t.leaderboard.exportBlocked)
   }
 
   const canExport = !loading && sorted.length > 0
@@ -99,14 +99,14 @@ export default function Leaderboard() {
       <SiteNav />
       <div className="app lb-page">
         <header className="app-header">
-          <h1 className="tagline">AI tool leaderboard</h1>
-          <p className="lb-subtitle">Every tool ranked by human-equivalent years compressed.</p>
+          <h1 className="tagline">{t.leaderboard.title}</h1>
+          <p className="lb-subtitle">{t.leaderboard.subtitle}</p>
         </header>
 
         <main className="app-main">
           <div className="lb-toolbar">
             <span className="lb-toolbar-label" id="lb-export-label">
-              Export
+              {t.leaderboard.exportLabel}
             </span>
             <div className="lb-toolbar-actions" role="group" aria-labelledby="lb-export-label">
               <button
@@ -133,20 +133,18 @@ export default function Leaderboard() {
 
           <div className="lb-table-wrap">
             <table className="lb-table">
-              <caption className="lb-caption">
-                {`Sorted ${sortDir === 'asc' ? 'ascending' : 'descending'} by ${SORT_LABELS[sortKey]} (base model)`}
-              </caption>
+              <caption className="lb-caption">{t.leaderboard.caption(sortDir, t.leaderboard.sortLabels[sortKey])}</caption>
               <thead>
                 <tr>
                   <th scope="col" aria-sort={ariaSortFor('rank')}>
-                    <SortButton label="Rank" active={sortKey === 'rank'} dir={sortDir} onClick={() => toggleSort('rank')} />
+                    <SortButton label={t.leaderboard.colRank} active={sortKey === 'rank'} dir={sortDir} onClick={() => toggleSort('rank')} />
                   </th>
                   <th scope="col" aria-sort={ariaSortFor('name')}>
-                    <SortButton label="Tool" active={sortKey === 'name'} dir={sortDir} onClick={() => toggleSort('name')} />
+                    <SortButton label={t.leaderboard.colTool} active={sortKey === 'name'} dir={sortDir} onClick={() => toggleSort('name')} />
                   </th>
                   <th scope="col" aria-sort={ariaSortFor('human_equiv_years')}>
                     <SortButton
-                      label="Human-equiv years"
+                      label={t.leaderboard.colYears}
                       active={sortKey === 'human_equiv_years'}
                       dir={sortDir}
                       onClick={() => toggleSort('human_equiv_years')}
@@ -154,7 +152,7 @@ export default function Leaderboard() {
                   </th>
                   <th scope="col" aria-sort={ariaSortFor('release_date')}>
                     <SortButton
-                      label="Release date"
+                      label={t.leaderboard.colDate}
                       active={sortKey === 'release_date'}
                       dir={sortDir}
                       onClick={() => toggleSort('release_date')}
@@ -166,7 +164,7 @@ export default function Leaderboard() {
                 {loading && (
                   <tr>
                     <td colSpan={4} className="lb-loading">
-                      Loading…
+                      {t.leaderboard.loading}
                     </td>
                   </tr>
                 )}
@@ -188,7 +186,7 @@ export default function Leaderboard() {
           </div>
 
           <footer className="app-footer">
-            <SourceBadge source={source} label="leaderboard" />
+            <SourceBadge source={source} label={t.leaderboard.sourceLabel} />
           </footer>
         </main>
         <SiteFooter />

@@ -1,12 +1,14 @@
 import './SiteNav.css'
 import { getRoute, type Route } from '../lib/routing'
+import { t } from '../lib/i18n'
+import { LanguageToggle } from './LanguageToggle'
 
 const LINKS: { href: string; label: string; route: Route }[] = [
-  { href: '/', label: 'Calculator', route: 'home' },
-  { href: '/compare', label: 'Compare', route: 'compare' },
-  { href: '/timeline', label: 'Timeline', route: 'timeline' },
-  { href: '/leaderboard', label: 'Leaderboard', route: 'leaderboard' },
-  { href: '/methodology', label: 'Methodology', route: 'methodology' },
+  { href: '/', label: t.nav.calculator, route: 'home' },
+  { href: '/compare', label: t.nav.compare, route: 'compare' },
+  { href: '/timeline', label: t.nav.timeline, route: 'timeline' },
+  { href: '/leaderboard', label: t.nav.leaderboard, route: 'leaderboard' },
+  { href: '/methodology', label: t.nav.methodology, route: 'methodology' },
 ]
 
 // One nav for every shipped surface except /embed (that's an iframe widget and
@@ -15,7 +17,7 @@ const LINKS: { href: string; label: string; route: Route }[] = [
 export function SiteNav() {
   const current = getRoute(window.location.pathname)
   return (
-    <nav className="site-nav" aria-label="Primary">
+    <nav className="site-nav" aria-label={t.nav.primaryAria}>
       <div className="site-nav-inner">
         <a className="site-nav-brand" href="/">
           aitime-calc
@@ -36,6 +38,7 @@ export function SiteNav() {
             )
           })}
         </ul>
+        <LanguageToggle />
       </div>
     </nav>
   )

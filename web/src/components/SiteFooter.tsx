@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchHealth } from '../lib/api'
+import { t } from '../lib/i18n'
 import './SiteFooter.css'
 
 // Shared page footer for every SiteNav surface. Self-fetches the running API
@@ -23,7 +24,7 @@ export function SiteFooter() {
       <span className="site-footer-brand">aitime-calc</span>
       <span
         className="site-footer-version"
-        title={version ? 'Running API version (/api/health)' : 'API version unavailable'}
+        title={version ? t.footer.versionKnownTitle : t.footer.versionUnknownTitle}
       >
         API {version ?? '—'}
       </span>
