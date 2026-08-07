@@ -109,7 +109,8 @@ export function TimelinePage() {
                   <g key={yr} className="timeline-gridline" transform={`translate(0,${scaleY(yr)})`}>
                     <line x1={0} x2={PLOT_W} y1={0} y2={0} />
                     <text x={-10} y={4} textAnchor="end">
-                      {yr}y
+                      {yr}
+                      {t.timeline.yTickSuffix}
                     </text>
                   </g>
                 ))}
@@ -142,7 +143,7 @@ export function TimelinePage() {
                         6px visual dot; the visible .timeline-dot stays small. */}
                     <circle className="timeline-hit" cx={scaleX(p.releaseMs)} cy={scaleY(p.humanEquivYears)} r={12} />
                     <circle className="timeline-dot" cx={scaleX(p.releaseMs)} cy={scaleY(p.humanEquivYears)} r={6} />
-                    <title>{`${p.tool.name} — ${p.humanEquivYears.toFixed(1)}y`}</title>
+                    <title>{`${p.tool.name} — ${p.humanEquivYears.toFixed(1)}${t.timeline.yTickSuffix}`}</title>
                   </a>
                 ))}
               </g>

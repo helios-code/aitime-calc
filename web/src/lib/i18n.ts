@@ -130,6 +130,7 @@ const en = {
     sinceDatePrefix: 'Since',
     elapsedAgo: (human: string) => `— ${human} ago`,
     unit: 'human-equivalent years',
+    comparisonLine: (doublings: string) => `≈ ${doublings} classic software generations`,
     contrastAria: 'Calendar time vs human-equivalent time',
     calendarTime: 'Calendar time',
     humanEquivalent: 'Human-equivalent',
@@ -184,6 +185,7 @@ const en = {
       'Y-axis (log scale): human-equivalent years compressed since each tool shipped, as of today. X-axis: release date. Click a point to open that tool’s full result.',
     chartAria:
       'Human-equivalent years compressed since each tool’s release, plotted against release date. Older releases show more compressed human-equivalent time.',
+    yTickSuffix: 'y',
     toolsLabel: 'Tools',
     shareLabel: 'Share this view',
     pointAria: (name: string, date: string, years: string) =>
@@ -279,6 +281,7 @@ const fr: Strings = {
     sinceDatePrefix: 'Depuis le',
     elapsedAgo: (human: string) => `— il y a ${human}`,
     unit: 'années de temps humain équivalent',
+    comparisonLine: (doublings: string) => `≈ ${doublings} générations de logiciels classiques`,
     contrastAria: 'Temps calendaire vs temps humain équivalent',
     calendarTime: 'Temps calendaire',
     humanEquivalent: 'Temps humain équivalent',
@@ -333,6 +336,9 @@ const fr: Strings = {
       'Axe Y (échelle log) : années de temps humain équivalent compressées depuis la sortie de chaque outil, à ce jour. Axe X : date de sortie. Cliquez sur un point pour ouvrir le résultat complet de cet outil.',
     chartAria:
       'Années de temps humain équivalent compressées depuis la sortie de chaque outil, en fonction de la date de sortie. Les sorties plus anciennes montrent un temps humain équivalent plus compressé.',
+    // 'a' (annum) — compact single-letter unit matching the EN 'y' on the terse
+    // log axis; spelled 'ans' would crowd the narrow left gutter. See .niwa-decision.md.
+    yTickSuffix: 'a',
     toolsLabel: 'Outils',
     shareLabel: 'Partager cette vue',
     pointAria: (name: string, date: string, years: string) =>
@@ -372,6 +378,12 @@ const fr: Strings = {
   },
 }
 
+// Strings for an explicit locale — lets pure helpers (e.g. the share-text
+// builder) and tests format FR/EN without depending on the module-load `LOCALE`.
+export function stringsFor(locale: Locale): Strings {
+  return locale === 'fr' ? fr : en
+}
+
 // The active strings for this page load. Components read `t.section.key`
 // directly — typed, so a wrong key is a compile error.
-export const t: Strings = LOCALE === 'fr' ? fr : en
+export const t: Strings = stringsFor(LOCALE)
