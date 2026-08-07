@@ -9,6 +9,9 @@
 import { chromium } from 'playwright'
 
 const WEB = (process.env.WEB_URL || 'http://localhost:5176').replace(/\/$/, '')
+// Locale to drive the app in, via the app's ?lang permalink param. Default 'en'.
+const LOCALE = process.env.LOCALE || 'en'
+const withLang = (p) => `${p}${p.includes('?') ? '&' : '?'}lang=${LOCALE}`
 const ROUTES = ['/', '/leaderboard', '/timeline', '/compare?tool=gpt-2&vs=gpt-3-api', '/embed?tool=gpt-2', '/methodology']
 const VPS = [{ name: 'desktop', width: 1280, height: 800 }, { name: 'mobile', width: 390, height: 844 }]
 
@@ -19,7 +22,7 @@ for (const theme of ['dark', 'light']) {
     const ctx = await browser.newContext({ colorScheme: theme, viewport: { width: vp.width, height: vp.height } })
     for (const route of ROUTES) {
       const page = await ctx.newPage()
-      await page.goto(WEB + route, { waitUntil: 'networkidle', timeout: 20000 })
+      await page.goto(WEB + withLang(route), { waitUntil: 'networkidle', timeout: 20000 })
       await page.waitForTimeout(500)
       const data = await page.evaluate((vw) => {
         const de = document.documentElement
@@ -49,7 +52,7 @@ for (const theme of ['dark', 'light']) {
 }
 await browser.close()
 for (const r of out) {
-  console.log(`[${r.verdict}] ${r.route} ${r.theme}/${r.vp} docOverflow=${r.docOverflow} bleeders=${r.bleederCount} offscreen=${r.offscreen.length}`)
+  console.log(`[${r.verdict}] ${LOCALE} ${r.route} ${r.theme}/${r.vp} docOverflow=${r.docOverflow} bleeders=${r.bleederCount} offscreen=${r.offscreen.length}`)
   if (r.verdict === 'CHECK') {
     if (r.bleeders.length) console.log('     bleeders:', JSON.stringify(r.bleeders))
     if (r.offscreen.length) console.log('     offscreen:', JSON.stringify(r.offscreen))
