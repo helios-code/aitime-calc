@@ -13,6 +13,10 @@ import { join } from 'node:path'
 const WEB = (process.env.WEB_URL || 'http://localhost:5176').replace(/\/$/, '')
 const API = (process.env.API_URL || 'http://localhost:3001').replace(/\/$/, '')
 const LABEL = process.env.LABEL || 'main'
+// Locale to drive the app in, via the app's ?lang permalink param (i18n.LANG_PARAM).
+// Default 'en'. The visual sweep + overflow probe honour it; click-through stays EN
+// because its button-name matchers are English literals.
+const LOCALE = process.env.LOCALE || 'en'
 const OUT = join(process.env.OUT || './out', LABEL)
 const SHOTS = join(OUT, 'screens')
 mkdirSync(SHOTS, { recursive: true })
@@ -42,6 +46,12 @@ const IGNORE_CONSOLE = [
 
 function isNoise(text) {
   return IGNORE_CONSOLE.some((re) => re.test(text))
+}
+
+// Append the active locale as ?lang / &lang so a route renders in LOCALE.
+function withLang(p) {
+  const sep = p.includes('?') ? '&' : '?'
+  return `${p}${sep}lang=${LOCALE}`
 }
 
 const results = []
@@ -93,7 +103,7 @@ async function sweep(browser) {
         let status = 'PASS'
         let note = ''
         try {
-          const resp = await page.goto(WEB + route.path, { waitUntil: 'networkidle', timeout: 20000 })
+          const resp = await page.goto(WEB + withLang(route.path), { waitUntil: 'networkidle', timeout: 20000 })
           if (resp && resp.status() >= 400) { status = 'FAIL'; note = `http ${resp.status()}` }
           // give client render + count-up a beat to settle before the shot
           await page.waitForTimeout(600)
@@ -104,7 +114,7 @@ async function sweep(browser) {
         }
         const errs = errorsByPage[key] || []
         if (errs.length) { status = 'FAIL'; note = (note ? note + '; ' : '') + `${errs.length} console err` }
-        results.push({ kind: 'route', key, route: route.path, theme, viewport: vp.name, status, note, errors: errs })
+        results.push({ kind: 'route', key, route: route.path, locale: LOCALE, theme, viewport: vp.name, status, note, errors: errs })
         await page.close()
       }
       await ctx.close()
@@ -215,6 +225,7 @@ async function main() {
   const fails = results.filter((r) => r.status === 'FAIL')
   const report = {
     label: LABEL,
+    locale: LOCALE,
     web: WEB,
     api: API,
     ran_at: new Date().toISOString(),
