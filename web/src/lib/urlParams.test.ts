@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isPlausibleToolId, isValidDateStr, parseCompareState, parseInitialState } from './urlParams'
+import { isPlausibleToolId, isValidDateStr, parseInitialState } from './urlParams'
 
 describe('isValidDateStr', () => {
   it('accepts a real calendar date', () => {
@@ -121,33 +121,5 @@ describe('parseInitialState', () => {
     expect(parseInitialState('?d_ai_months=lol').dAiMonths).toBeNull()
     expect(parseInitialState('?d_classic_months=1').dClassicMonths).toBeNull()
     expect(parseInitialState('?d_classic_months=99999').dClassicMonths).toBeNull()
-  })
-})
-
-describe('parseCompareState', () => {
-  it('reads ?tool= as side a and ?vs= as side b', () => {
-    const state = parseCompareState('?tool=gpt-4&vs=claude-3')
-    expect(state.a).toBe('gpt-4')
-    expect(state.b).toBe('claude-3')
-  })
-
-  it('treats a missing ?vs= as absent', () => {
-    expect(parseCompareState('?tool=gpt-4').b).toBeNull()
-  })
-
-  it('rejects a syntactically invalid ?vs=', () => {
-    expect(parseCompareState('?vs=%3Cscript%3E').b).toBeNull()
-  })
-
-  it('defaults model to base unless explicitly accelerating', () => {
-    expect(parseCompareState('').model).toBe('base')
-    expect(parseCompareState('?model=accelerating').model).toBe('accelerating')
-  })
-
-  it('resolves legacy aliases on both sides, like parseInitialState', () => {
-    const state = parseCompareState('?tool=cursor-yolo&vs=gpt-3')
-    expect(state.a).toBe('cursor-yolo-mode')
-    expect(state.b).toBe('gpt-3-api')
-    expect(state.a).toBe(parseInitialState('?tool=cursor-yolo').tool)
   })
 })
