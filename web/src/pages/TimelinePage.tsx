@@ -1,13 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import '../App.css'
 import './TimelinePage.css'
 import { fetchTools } from '../lib/api'
 import { buildTimelinePoints } from '../lib/timelineData'
+import { decodeTimeline, encodeTimeline, syncSearch } from '../lib/urlState'
 import { FALLBACK_TOOLS } from '../data/tools'
+import { ModelToggle } from '../components/ModelToggle'
 import { SourceBadge } from '../components/SourceBadge'
 import { SiteNav } from '../components/SiteNav'
 import { SiteFooter } from '../components/SiteFooter'
-import type { Tool } from '../types'
+import type { CalcModel, Tool } from '../types'
+
+const initialModel = decodeTimeline(window.location.search).model
 
 const TODAY = new Date().toISOString().slice(0, 10)
 const WIDTH = 960
@@ -19,6 +23,7 @@ const PLOT_H = HEIGHT - MARGIN.top - MARGIN.bottom
 export function TimelinePage() {
   const [tools, setTools] = useState<Tool[]>(FALLBACK_TOOLS)
   const [source, setSource] = useState<'live' | 'mock'>('mock')
+  const [model, setModel] = useState<CalcModel>(initialModel)
 
   useEffect(() => {
     let cancelled = false
@@ -32,7 +37,29 @@ export function TimelinePage() {
     }
   }, [])
 
-  const points = useMemo(() => buildTimelinePoints(tools, TODAY), [tools])
+  // Mirror the model choice into the URL (push per change so Back/Forward walks
+  // it), skipping the mount run since the URL already reflects `initialModel`.
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
+    const next = encodeTimeline({ model })
+    // Skip when the URL already matches — the change came from Back/Forward
+    // (we wrote that URL) or it's a no-op.
+    if (next === window.location.search) return
+    syncSearch(next, 'push')
+  }, [model])
+
+  // Back/Forward restored a prior URL — re-read the model from it.
+  useEffect(() => {
+    const onPop = () => setModel(decodeTimeline(window.location.search).model)
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  const points = useMemo(() => buildTimelinePoints(tools, TODAY, model), [tools, model])
 
   const minMs = points[0]?.releaseMs ?? 0
   const maxMs = points[points.length - 1]?.releaseMs ?? 1
@@ -59,6 +86,7 @@ export function TimelinePage() {
       <div className="app timeline-page">
         <header className="app-header">
           <h1 className="tagline">Every tool in the dataset, on one human-equivalent-time axis</h1>
+          <ModelToggle model={model} onChange={setModel} />
         </header>
 
         <main className="app-main">
