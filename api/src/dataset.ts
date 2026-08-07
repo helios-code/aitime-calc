@@ -754,6 +754,30 @@ export const TOOLS: AiTool[] = [
     note: "Claude Opus 5 launch, Anthropic's flagship for complex agentic coding work.",
     sources: ["Anthropic blog announcement, July 2026"],
   },
+  {
+    id: "kimi-k3",
+    name: "Kimi K3",
+    vendor: "Moonshot AI",
+    release_date: "2026-07-27",
+    category: "open-weight-llm",
+    note: "Open weights for a 2.8T-parameter MoE (104B active), the largest open-weight model released to date, under a Modified MIT license.",
+    sources: [
+      "Moonshot AI Kimi K3 open-weights release, July 2026",
+      "Quartz: \"Moonshot AI releases Kimi K3 open weights for download\", July 2026",
+    ],
+  },
+  {
+    id: "qwen-3-8-max",
+    name: "Qwen3.8-Max",
+    vendor: "Alibaba",
+    release_date: "2026-08-03",
+    category: "multimodal-llm",
+    note: "Alibaba's largest model to date: a 2.4T-parameter MoE (95B active), multimodal over text/image/video with a 1M-token context, launched with API access and published pricing.",
+    sources: [
+      "Alibaba Cloud Qwen3.8-Max launch, August 3 2026",
+      "Bloomberg: \"Alibaba's Qwen3.8-Max claims benchmark scores rivaling Anthropic\", August 2026",
+    ],
+  },
 ];
 
 // Old ids the web fallback dataset (web/src/data/tools.ts) shipped before it was
