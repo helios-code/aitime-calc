@@ -8,10 +8,7 @@
 ## 1. Product Brief
 
 ### Acceptance Criteria
-- [ ] 1. cd web && npm run lint prints real oxlint output and exits 0 on a clean tree
-- [ ] 2. lint failure produces non-zero exit (verify by introducing then reverting a violation)
-- [ ] 3. CONTRIBUTING.md documents scripts/gate-check.sh, .niwa-decision.md ROOT_CAUSE/DECISION requirement, and worktree node_modules note
-- [ ] 4. build green and all ~105 web tests pass
+_(untyped ticket — no acceptance criteria)_
 
 ## 2. Root cause & decisions
 
@@ -45,8 +42,6 @@ clean — DX-only: lint:ox + CONTRIBUTING; oxlint/build/105 tests verified
 
 - round 1 → **approve** (review-4cead7da-bac4-4364-a88b-dde5d9b66270)
 - round 2 → **approve** (review-4cead7da-bac4-4364-a88b-dde5d9b66270)
-
-**Approve-with-findings (follow-up):** clean — DX-only: lint:ox + CONTRIBUTING; oxlint/build/105 tests verified
 
 ---
 _Auto-assembled by the niwa scribe from the Q&A gate. Task `4cead7da-bac4-4364-a88b-dde5d9b66270`._
