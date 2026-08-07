@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { SiteNav } from '../components/SiteNav'
+import { SiteFooter } from '../components/SiteFooter'
 
 export function MethodologyPage() {
   useEffect(() => {
@@ -226,6 +227,7 @@ humanEquivYears  = (months * multiplier) / 12
           </p>
         </section>
         </main>
+        <SiteFooter />
       </div>
     </>
   )

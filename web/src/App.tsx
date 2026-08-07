@@ -15,6 +15,7 @@ import { ShareCard } from './components/ShareCard'
 import { MethodologyExplainer } from './components/MethodologyExplainer'
 import { SourceBadge } from './components/SourceBadge'
 import { SiteNav } from './components/SiteNav'
+import { SiteFooter } from './components/SiteFooter'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -151,6 +152,7 @@ function App() {
           <SourceBadge source={toolsSource} label="Tools" />
           <SourceBadge source={calcSource} label="Calc" />
         </footer>
+        <SiteFooter />
       </div>
     </>
   )
