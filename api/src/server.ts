@@ -468,7 +468,11 @@ export function buildServer() {
       : LOCALHOST_ORIGIN_RE,
   });
 
-  app.get("/api/health", async () => ({ ok: true, version: PKG_VERSION }));
+  app.get("/api/health", async () => ({
+    status: "ok",
+    version: PKG_VERSION,
+    uptime_s: Math.floor(process.uptime()),
+  }));
 
   app.get("/api/tools", async () => ({ tools: TOOLS }));
 
