@@ -2,13 +2,15 @@ import { afterEach, describe, expect, it } from "vitest";
 import { buildServer } from "../src/server.js";
 
 describe("GET /api/health", () => {
-  it("reports ok + version", async () => {
+  it("reports status ok, version, and uptime_s", async () => {
     const app = buildServer();
     const res = await app.inject({ method: "GET", url: "/api/health" });
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.ok).toBe(true);
+    expect(body.status).toBe("ok");
     expect(typeof body.version).toBe("string");
+    expect(Number.isInteger(body.uptime_s)).toBe(true);
+    expect(body.uptime_s).toBeGreaterThanOrEqual(0);
   });
 });
 
