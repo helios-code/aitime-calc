@@ -1,6 +1,6 @@
 # DX: fix web lint wrapper + document contributor gate flow
 
-## Team : dev-2 (aitime-calc)
+## Team : dev-2 (niwa)
 ## Branch : dx/web-lint-ox (from main)
 ## Relay task : 4cead7da-bac4-4364-a88b-dde5d9b66270
 ## Status : 🔵 SUBMITTED
@@ -21,11 +21,12 @@ DECISION: Keep `lint` unchanged (works fine in any non-RTK contributor env) and 
 ## 3. Files changed
 
 ```
-.niwa-decision.md                                |  7 ++--
- CONTRIBUTING.md                                  | 43 +++++++++++++++++++++---
- features/4cead7da-bac4-4364-a88b-dde5d9b66270.md | 34 +++++++++++++++++++
- web/package.json                                 |  1 +
- 4 files changed, 76 insertions(+), 9 deletions(-)
+.niwa-decision.md                                  | 39 +-------------------
+ CONTRIBUTING.md                                    | 43 ++++++++++++++++++++--
+ features/4cead7da-bac4-4364-a88b-dde5d9b66270.md   | 37 +++++++++++++++++++
+ ...-lint-wrapper-document-contributor-gate-flow.md | 43 ++++++++++++++++++++++
+ web/package.json                                   |  1 +
+ 5 files changed, 122 insertions(+), 41 deletions(-)
 ```
 
 ## 4. QA Log
@@ -33,11 +34,19 @@ DECISION: Keep `lint` unchanged (works fine in any non-RTK contributor env) and 
 ### Round 1 — ✅ APPROVED by review-4cead7da-bac4-4364-a88b-dde5d9b66270 @ `6baa3ae9d`
 clean — DX-only: lint:ox script + CONTRIBUTING; oxlint src verified exit 0, no product code touched
 
+### Round 2 — ✅ APPROVED by review-4cead7da-bac4-4364-a88b-dde5d9b66270 @ `a04046fa1`
+clean — DX-only: lint:ox + CONTRIBUTING; oxlint/build/105 tests verified
+- 🟢 AC1: oxlint (npm run lint) prints real warnings, exit 0 on clean tree
+- 🟢 AC2: injected redeclare error exits 1; revert exits 0
+- 🟢 AC3: CONTRIBUTING.md documents gate-check.sh, .niwa-decision ROOT_CAUSE/DECISION, worktree node_modules note
+- 🟢 AC4: build exit 0; vitest 105 pass 0 fail
+
 ## 5. Timeline
 
 - round 1 → **approve** (review-4cead7da-bac4-4364-a88b-dde5d9b66270)
+- round 2 → **approve** (review-4cead7da-bac4-4364-a88b-dde5d9b66270)
 
-**Approve-with-findings (follow-up):** clean — DX-only: lint:ox script + CONTRIBUTING; oxlint src verified exit 0, no product code touched
+**Approve-with-findings (follow-up):** clean — DX-only: lint:ox + CONTRIBUTING; oxlint/build/105 tests verified
 
 ---
 _Auto-assembled by the niwa scribe from the Q&A gate. Task `4cead7da-bac4-4364-a88b-dde5d9b66270`._
