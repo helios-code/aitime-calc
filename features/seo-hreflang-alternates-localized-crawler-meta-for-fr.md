@@ -69,10 +69,10 @@ SCOPE: `web/middleware.ts`, `web/middleware.test.ts` only. API untouched.
 
 ```
 .niwa-decision.md                                  |  70 ++++---
- ...ang-alternates-localized-crawler-meta-for-fr.md |  94 +++++++++
+ ...ang-alternates-localized-crawler-meta-for-fr.md |  96 ++++++++++
  web/middleware.test.ts                             |  82 +++++++-
  web/middleware.ts                                  | 213 ++++++++++++++++++---
- 4 files changed, 405 insertions(+), 54 deletions(-)
+ 4 files changed, 407 insertions(+), 54 deletions(-)
 ```
 
 ## 4. QA Log
