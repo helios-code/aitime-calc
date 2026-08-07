@@ -82,6 +82,39 @@ describe('buildI18nTags', () => {
     expect(tags).toContain('<link rel="alternate" hreflang="en" href="https://aitime-calc.example/?tool=gpt-4o" />')
     expect(tags).toContain('<link rel="alternate" hreflang="fr" href="https://aitime-calc.example/?tool=gpt-4o&amp;lang=fr" />')
   })
+
+  it('strips utm_* and ad-click params from canonical + hreflang (EN), keeping content params', () => {
+    const tags = buildI18nTags(
+      ORIGIN,
+      '/',
+      new URLSearchParams('utm_source=twitter&utm_medium=social&gclid=abc&fbclid=xyz&ref=hn&tool=gpt-4o'),
+      'en',
+    )
+    // Clean canonical + alternates: only the content param survives.
+    expect(tags).toContain('<link rel="canonical" href="https://aitime-calc.example/?tool=gpt-4o" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="en" href="https://aitime-calc.example/?tool=gpt-4o" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="fr" href="https://aitime-calc.example/?tool=gpt-4o&amp;lang=fr" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="x-default" href="https://aitime-calc.example/?tool=gpt-4o" />')
+    // No tracking pair leaks into any emitted URL (full name=value tokens so the
+    // check can't false-match on `href=` etc.).
+    for (const token of ['utm_source=twitter', 'utm_medium=social', 'gclid=abc', 'fbclid=xyz', 'ref=hn']) {
+      expect(tags).not.toContain(token)
+    }
+  })
+
+  it('strips tracking params on a FR page while preserving ?lang=fr', () => {
+    const tags = buildI18nTags(
+      ORIGIN,
+      '/methodology',
+      new URLSearchParams('lang=fr&utm_campaign=launch&UTM_Source=News'),
+      'fr',
+    )
+    // FR canonical keeps lang, drops tracking (match is case-insensitive).
+    expect(tags).toContain('<link rel="canonical" href="https://aitime-calc.example/methodology?lang=fr" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="fr" href="https://aitime-calc.example/methodology?lang=fr" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="x-default" href="https://aitime-calc.example/methodology" />')
+    expect(tags.toLowerCase()).not.toContain('utm_')
+  })
 })
 
 describe('buildRobots', () => {

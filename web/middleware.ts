@@ -181,13 +181,27 @@ export function buildOgImageUrl(searchParams: URLSearchParams): string | null {
   return url.toString()
 }
 
+// Campaign/click tracking params carry no page identity — leaving them in a
+// canonical or hreflang URL splits the index signal across every ?utm_… variant.
+// Strip the utm_* family plus the common ad-click ids so each locale resolves to
+// one clean canonical. Match is case-insensitive; ?lang is preserved (it drives
+// locale) and is handled separately in localeUrl.
+function isTrackingParam(key: string): boolean {
+  const k = key.toLowerCase()
+  return k.startsWith('utm_') || k === 'gclid' || k === 'fbclid' || k === 'ref'
+}
+
 // Absolute URL for `pathname` at `locale`, preserving every other query param.
-// EN drops ?lang (lang-free is the canonical EN form); FR sets ?lang=fr. This
+// EN drops ?lang (lang-free is the canonical EN form); FR sets ?lang=fr. Tracking
+// params are stripped so campaign junk never dilutes the canonical/hreflang. This
 // is the single source for both the in-page hreflang/canonical links and the
 // sitemap, so the two can never disagree about a locale's URL shape.
 function localeUrl(origin: string, pathname: string, searchParams: URLSearchParams, locale: Locale): string {
   const params = new URLSearchParams(searchParams)
   params.delete('lang')
+  for (const key of [...params.keys()]) {
+    if (isTrackingParam(key)) params.delete(key)
+  }
   if (locale === 'fr') params.set('lang', 'fr')
   const qs = params.toString()
   return `${origin}${pathname}${qs ? `?${qs}` : ''}`
