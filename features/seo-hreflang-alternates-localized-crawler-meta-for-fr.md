@@ -1,9 +1,9 @@
 # SEO: hreflang alternates + localized crawler meta for FR
 
-## Team : anonymous (aitime-calc)
+## Team : dev (niwa)
 ## Branch : feat/web-hreflang-crawler-meta (from main)
 ## Relay task : 8b28ecd3-a562-43b2-b0d9-5eb4de51a080
-## Status : 🔵 IN REVIEW
+## Status : 🔵 SUBMITTED
 
 ## 1. Product Brief
 
@@ -68,11 +68,11 @@ SCOPE: `web/middleware.ts`, `web/middleware.test.ts` only. API untouched.
 ## 3. Files changed
 
 ```
-.niwa-decision.md                                  |  84 ++++----
- ...ang-alternates-localized-crawler-meta-for-fr.md |  85 ++++++++
+.niwa-decision.md                                  |  70 ++++---
+ ...ang-alternates-localized-crawler-meta-for-fr.md |  94 +++++++++
  web/middleware.test.ts                             |  82 +++++++-
  web/middleware.ts                                  | 213 ++++++++++++++++++---
- 4 files changed, 395 insertions(+), 69 deletions(-)
+ 4 files changed, 405 insertions(+), 54 deletions(-)
 ```
 
 ## 4. QA Log
@@ -89,6 +89,8 @@ clean — hreflang/canonical/og:locale both locales, embed excluded, dynamic rob
 ## 5. Timeline
 
 - round 1 → **approve** (review-8b28ecd3-a562-43b2-b0d9-5eb4de51a080)
+
+**Approve-with-findings (follow-up):** clean — hreflang/canonical/og:locale both locales, embed excluded, dynamic robots+sitemap origin-derived, EN unchanged, 138 tests + build green
 
 ---
 _Auto-assembled by the niwa scribe from the Q&A gate. Task `8b28ecd3-a562-43b2-b0d9-5eb4de51a080`._
