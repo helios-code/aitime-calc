@@ -40,6 +40,7 @@ interface OgQuery {
   tool?: string;
   model?: string;
   date?: string;
+  lang?: string;
   d_classic_months?: string | number;
   d_ai_months?: string | number;
 }
@@ -84,10 +85,14 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-// Embedded font, subset to Basic Latin + common punctuation (~45KB/42KB). The share-card
-// endpoint must render identically wherever it deploys — ambient system fonts aren't
-// guaranteed there, so resvg must not depend on them. Loaded as buffers (not fontFiles
-// paths) since the wasm build has no reliable filesystem access of its own.
+// Embedded font, subset to Basic Latin + common punctuation + Latin-1 Supplement and
+// Œ/œ (~23KB/20KB) so the FR share cards render accented glyphs (é è à ç û, «guillemets»,
+// localized months like "août"). The share-card endpoint must render identically wherever
+// it deploys — ambient system fonts aren't guaranteed there, so resvg must not depend on
+// them. Loaded as buffers (not fontFiles paths) since the wasm build has no reliable
+// filesystem access of its own. Regenerate with pyftsubset from the full DejaVu Sans if
+// the character set ever needs to grow (unicodes: U+0020-007E,U+2013,U+2014,U+2018-201F,
+// U+2026,U+00A0-00FF,U+0152,U+0153 — see .niwa-decision.md).
 const OG_FONT_DIR = join(dirname(fileURLToPath(import.meta.url)), "../assets/fonts");
 const OG_FONT_FAMILY = "DejaVu Sans";
 const OG_FONT_BUFFERS = [
@@ -121,18 +126,69 @@ export function fitFontSize(
   return Math.max(minFontSize, fitted);
 }
 
-function formatDateLabel(d: Date): string {
-  return new Intl.DateTimeFormat("en-US", {
+// ---- OG card localization ----
+// The OG endpoint renders api-side, so it can't import the web strings module.
+// These few card labels are duplicated from web/src/lib/i18n.ts (the source of
+// truth for FR copy) — keep them in sync if the web strings change. Only labels
+// the card actually paints live here; tool/vendor names are dataset data and
+// stay as-is regardless of locale.
+type OgLocale = "en" | "fr";
+
+// Invalid/absent lang falls back to English, matching the web resolveLocale
+// default and keeping existing EN cards byte-for-byte unchanged when lang is
+// omitted.
+function resolveOgLocale(raw: string | undefined): OgLocale {
+  return raw === "fr" ? "fr" : "en";
+}
+
+const OG_STRINGS: Record<OgLocale, { releaseDate: string; byPrefix: string; model: (m: CalcModel) => string }> = {
+  en: {
+    releaseDate: "release date",
+    byPrefix: "By",
+    model: (m) => `${m} model`,
+  },
+  fr: {
+    releaseDate: "date de sortie",
+    byPrefix: "Le",
+    model: (m) => `modèle ${m === "accelerating" ? "accéléré" : "base"}`,
+  },
+};
+
+const INTL_LOCALE: Record<OgLocale, string> = { en: "en-US", fr: "fr-FR" };
+
+function formatDateLabel(d: Date, locale: OgLocale = "en"): string {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
     month: "short",
     year: "numeric",
     timeZone: "UTC",
   }).format(d);
 }
 
+// Locale-aware "N years M months" for the card hero. Mirrors atem.yearsToHuman
+// (which stays English — it feeds the JSON API), localized for the OG image only.
+function humanEquivLabel(years: number, locale: OgLocale): string {
+  const totalMonths = Math.round(years * 12);
+  const y = Math.floor(totalMonths / 12);
+  const m = totalMonths % 12;
+  if (locale === "fr") {
+    const parts = [`${y} an${y === 1 ? "" : "s"}`];
+    if (m > 0) parts.push(`${m} mois`);
+    return parts.join(" ");
+  }
+  const parts = [`${y} year${y === 1 ? "" : "s"}`];
+  if (m > 0) parts.push(`${m} month${m === 1 ? "" : "s"}`);
+  return parts.join(" ");
+}
+
 // Date-mode card: no tool_id, `date` is the release_date input (same semantics as
 // /api/calc's date mode — release_date=date, as_of=today). Mirrors the tool-mode
 // card layout but without a vendor/tool-name line, since there is no tool.
-function buildDateModeOgSvg(dateStr: string, modelParam: string | undefined, atemParams: AtemParams): string {
+function buildDateModeOgSvg(
+  dateStr: string,
+  modelParam: string | undefined,
+  atemParams: AtemParams,
+  locale: OgLocale,
+): string {
   if (modelParam !== undefined && modelParam !== "base" && modelParam !== "accelerating") {
     throw { status: 400, error: `unknown model: ${modelParam}` };
   }
@@ -150,11 +206,12 @@ function buildDateModeOgSvg(dateStr: string, modelParam: string | undefined, ate
   }
 
   const result = computeAtem(release, asOf, model, atemParams);
-  const heroLine = `By ${formatDateLabel(release)} = ~${yearsToHuman(result.humanEquivYears)}`;
+  const s = OG_STRINGS[locale];
+  const heroLine = `${s.byPrefix} ${formatDateLabel(release, locale)} = ~${humanEquivLabel(result.humanEquivYears, locale)}`;
 
-  const eyebrow = escapeXml("release date");
+  const eyebrow = escapeXml(s.releaseDate);
   const hero = escapeXml(heroLine);
-  const modelLabel = escapeXml(`${model} model`);
+  const modelLabel = escapeXml(s.model(model));
   const heroFontSize = fitFontSize(heroLine, 56);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_CARD_WIDTH}" height="630" viewBox="0 0 ${OG_CARD_WIDTH} 630">
@@ -168,12 +225,13 @@ function buildDateModeOgSvg(dateStr: string, modelParam: string | undefined, ate
 
 export function buildOgSvg(q: OgQuery): string {
   const atemParams = resolveDoublingParams(q);
+  const locale = resolveOgLocale(q.lang);
   const toolId = q.tool;
   if (!toolId) {
     if (!q.date) {
       throw { status: 400, error: "tool or date is required" };
     }
-    return buildDateModeOgSvg(q.date, q.model, atemParams);
+    return buildDateModeOgSvg(q.date, q.model, atemParams, locale);
   }
   const tool = findTool(toolId);
   if (!tool) {
@@ -196,12 +254,13 @@ export function buildOgSvg(q: OgQuery): string {
   }
 
   const result = computeAtem(release, asOf, model, atemParams);
-  const heroLine = `${tool.name} = ~${yearsToHuman(result.humanEquivYears)}`;
+  const s = OG_STRINGS[locale];
+  const heroLine = `${tool.name} = ~${humanEquivLabel(result.humanEquivYears, locale)}`;
 
   const name = escapeXml(tool.name);
   const vendor = escapeXml(tool.vendor);
   const hero = escapeXml(heroLine);
-  const modelLabel = escapeXml(`${model} model`);
+  const modelLabel = escapeXml(s.model(model));
 
   const nameFontSize = fitFontSize(tool.name, 48);
   const heroFontSize = fitFontSize(heroLine, 56);
