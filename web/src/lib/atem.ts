@@ -1,4 +1,5 @@
 import type { CalcModel, CalcParams, CalcResult } from '../types'
+import { elapsedYearsMonths, humanizeDuration, splitYears } from './humanize'
 
 const MS_PER_DAY = 86_400_000
 const AVG_MONTH_DAYS = 30.436875
@@ -17,16 +18,12 @@ function parseDate(s: string): Date {
   return d
 }
 
-function humanElapsed(release: Date, asOf: Date): { years: number; months: number; label: string } {
-  let months = (asOf.getUTCFullYear() - release.getUTCFullYear()) * 12 + (asOf.getUTCMonth() - release.getUTCMonth())
-  if (asOf.getUTCDate() < release.getUTCDate()) months -= 1
-  if (months < 0) months = 0
-  const years = Math.floor(months / 12)
-  const remMonths = months % 12
-  const parts: string[] = []
-  if (years > 0) parts.push(`${years} yr`)
-  if (remMonths > 0 || years === 0) parts.push(`${remMonths} mo`)
-  return { years, months, label: parts.join(' ') || '0 mo' }
+// CalcResult carries the EN ("canonical") elapsed label; the web UI re-derives a
+// locale-aware one from the numbers via humanize.ts (see F1/F2). Kept EN here so
+// the API/JSON contract and non-UI consumers stay stable.
+function humanElapsed(release: Date, asOf: Date): string {
+  const { years, months } = elapsedYearsMonths(release, asOf)
+  return humanizeDuration(years, months, 'en', 'short')
 }
 
 function acceleratingDoublings(releaseMs: number, asOfMs: number, dAiNow: number): number {
@@ -56,7 +53,7 @@ export function computeCalc(params: CalcParams): CalcResult {
   const days = Math.max(0, Math.round((asOf.getTime() - releaseDate.getTime()) / MS_PER_DAY))
   const monthsFloat = days / AVG_MONTH_DAYS
   const multiplier = dClassic / dAi
-  const elapsed = humanElapsed(releaseDate, asOf)
+  const elapsedHuman = humanElapsed(releaseDate, asOf)
 
   let aiDoublings: number
   let humanEquivYears: number
@@ -69,18 +66,19 @@ export function computeCalc(params: CalcParams): CalcResult {
     humanEquivYears = (monthsFloat * multiplier) / 12
   }
 
-  const humanEquivWhole = Math.floor(humanEquivYears)
-  const humanEquivMonths = Math.round((humanEquivYears - humanEquivWhole) * 12)
-  const humanEquivHuman = `${humanEquivWhole} years ${humanEquivMonths} months`
+  const equivSplit = splitYears(humanEquivYears)
+  const humanEquivHuman = humanizeDuration(equivSplit.years, equivSplit.months, 'en', 'long')
 
   return {
     input: { release_date: params.release_date, as_of: asOf.toISOString().slice(0, 10), tool_id: params.tool_id },
-    elapsed: { days, months: Number(monthsFloat.toFixed(2)), human: elapsed.label },
+    elapsed: { days, months: Number(monthsFloat.toFixed(2)), human: elapsedHuman },
     model,
     params: { d_classic_months: dClassic, d_ai_months: dAi, multiplier: Number(multiplier.toFixed(2)) },
     ai_doublings: Number(aiDoublings.toFixed(2)),
     human_equiv_years: Number(humanEquivYears.toFixed(2)),
     human_equiv_human: humanEquivHuman,
+    // EN canonical for the JSON contract; the web UI renders a localized line
+    // from `ai_doublings` via t.result.comparisonLine (see humanize.ts pointer).
     comparison_line: `≈ ${aiDoublings.toFixed(1)} classic software generations`,
     methodology_note:
       model === 'accelerating'

@@ -1,5 +1,6 @@
 import { useCountUp } from '../hooks/useCountUp'
-import { t } from '../lib/i18n'
+import { LOCALE, t } from '../lib/i18n'
+import { resultElapsed, resultEquiv } from '../lib/humanize'
 import type { CalcResult } from '../types'
 
 interface Props {
@@ -16,6 +17,11 @@ export function ResultHero({ result, toolName }: Props) {
   const elapsedYears = result.elapsed.months / 12
   const humanYears = result.human_equiv_years
   const elapsedPct = Math.max(2, Math.min(100, (elapsedYears / humanYears) * 100))
+
+  // Locale-aware durations, re-derived from the numeric fields (never the EN
+  // strings baked into CalcResult) so FR never shows mixed-language text.
+  const elapsedHuman = resultElapsed(result, LOCALE)
+  const equivHuman = resultEquiv(result, LOCALE)
 
   const wholeDoublings = Math.floor(result.ai_doublings)
   const chipCount = Math.min(wholeDoublings, MAX_DOUBLING_CHIPS)
@@ -34,7 +40,7 @@ export function ResultHero({ result, toolName }: Props) {
             {t.result.sinceDatePrefix} {result.input.release_date}
           </>
         )}{' '}
-        {t.result.elapsedAgo(result.elapsed.human)}
+        {t.result.elapsedAgo(elapsedHuman)}
       </p>
 
       <h1 className="result-figure">
@@ -42,7 +48,7 @@ export function ResultHero({ result, toolName }: Props) {
         <span className="result-unit">{t.result.unit}</span>
       </h1>
 
-      <p className="result-comparison">{result.comparison_line}</p>
+      <p className="result-comparison">{t.result.comparisonLine(result.ai_doublings.toFixed(1))}</p>
 
       <div className="contrast-bars" aria-label={t.result.contrastAria}>
         <div className="contrast-row">
@@ -50,14 +56,14 @@ export function ResultHero({ result, toolName }: Props) {
           <div className="contrast-track">
             <div className="contrast-fill contrast-fill--calendar" style={{ width: `${elapsedPct}%` }} />
           </div>
-          <span className="contrast-value">{result.elapsed.human}</span>
+          <span className="contrast-value">{elapsedHuman}</span>
         </div>
         <div className="contrast-row">
           <span className="contrast-label">{t.result.humanEquivalent}</span>
           <div className="contrast-track">
             <div className="contrast-fill contrast-fill--human" style={{ width: '100%' }} />
           </div>
-          <span className="contrast-value">{result.human_equiv_human}</span>
+          <span className="contrast-value">{equivHuman}</span>
         </div>
       </div>
 

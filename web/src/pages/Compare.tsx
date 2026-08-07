@@ -11,6 +11,7 @@ import { SiteNav } from '../components/SiteNav'
 import { SiteFooter } from '../components/SiteFooter'
 import { ShareLinkButton } from '../components/ShareLinkButton'
 import { LOCALE, t } from '../lib/i18n'
+import { resultElapsed } from '../lib/humanize'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 const FALLBACK_B = FALLBACK_TOOLS.find((t) => t.id !== DEFAULT_TOOL_ID)?.id ?? DEFAULT_TOOL_ID
@@ -50,15 +51,18 @@ function ResultColumn({
   pickerLabel: string
 }) {
   const tool = tools.find((t) => t.id === selectedId)
+  const r = side.result
+  // Locale-aware elapsed, re-derived from the numeric dates (not the EN string).
+  const elapsedHuman = r ? resultElapsed(r, LOCALE) : ''
   return (
     <div className="cmp-col">
       <ToolPicker tools={tools} selectedId={selectedId} onChange={onChange} label={pickerLabel} />
       <div className="cmp-result">
-        {side.result && side.toolId === selectedId ? (
+        {r && side.toolId === selectedId ? (
           <>
-            <div className="cmp-figure">{side.result.human_equiv_years.toFixed(1)}</div>
+            <div className="cmp-figure">{r.human_equiv_years.toFixed(1)}</div>
             <div className="cmp-unit">{t.compare.unit}</div>
-            <p className="cmp-comparison">{side.result.comparison_line}</p>
+            <p className="cmp-comparison">{t.result.comparisonLine(r.ai_doublings.toFixed(1))}</p>
             <dl className="cmp-meta">
               <div>
                 <dt>{t.compare.released}</dt>
@@ -66,11 +70,11 @@ function ResultColumn({
               </div>
               <div>
                 <dt>{t.compare.elapsed}</dt>
-                <dd>{side.result.elapsed.human}</dd>
+                <dd>{elapsedHuman}</dd>
               </div>
               <div>
                 <dt>{t.compare.aiDoublings}</dt>
-                <dd>{side.result.ai_doublings.toFixed(1)}</dd>
+                <dd>{r.ai_doublings.toFixed(1)}</dd>
               </div>
             </dl>
             <SourceBadge source={side.source} label={t.compare.calcLabel} />
