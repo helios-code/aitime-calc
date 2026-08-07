@@ -3,7 +3,7 @@ import { buildServer } from "../src/server.js";
 import { TOOLS } from "../src/dataset.js";
 
 // Every assertion pins as_of so the numbers can't drift with the wall clock.
-const AS_OF = "2026-07-30";
+const AS_OF = "2026-08-07";
 
 describe("GET /api/timeline", () => {
   it("returns every dataset tool, oldest release first", async () => {
