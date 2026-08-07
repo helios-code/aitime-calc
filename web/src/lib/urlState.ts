@@ -1,5 +1,6 @@
 import type { CalcModel } from '../types'
 import { resolveToolId } from '../data/tools'
+import { LANG_PARAM } from './i18n'
 import { isPlausibleToolId, isValidDateStr } from './urlParams'
 
 // Shareable-permalink encode/decode for the Compare (/compare) and Timeline
@@ -83,15 +84,15 @@ export function encodeTimeline(state: { model: CalcModel }): string {
 
 // ---- Shareable-link language ----
 
-// Append the active locale as ?lang so a shared permalink opens in the same
-// language the sharer is viewing. English is the default and left implicit —
-// same rule as encode* dropping the default model/as_of, keeping URLs clean.
-// `locale` is 'lang' per i18n.LANG_PARAM (kept a literal here so urlState stays
-// dependency-free and purely testable). Never throws.
+// Append the active locale as the lang param so a shared permalink opens in the
+// same language the sharer is viewing. English is the default and left implicit
+// — same rule as encode* dropping the default model/as_of, keeping URLs clean.
+// Uses i18n's LANG_PARAM so the read (i18n) and write (here) sides can never
+// drift. Never throws.
 export function appendLang(search: string, locale: string): string {
   if (locale === 'en') return search
   const params = new URLSearchParams(search)
-  params.set('lang', locale)
+  params.set(LANG_PARAM, locale)
   return `?${params.toString()}`
 }
 
