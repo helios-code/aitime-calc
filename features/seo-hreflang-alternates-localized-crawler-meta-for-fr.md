@@ -1,3 +1,17 @@
+# SEO: hreflang alternates + localized crawler meta for FR
+
+## Team : dev (niwa)
+## Branch : feat/web-hreflang-crawler-meta (from main)
+## Relay task : 8b28ecd3-a562-43b2-b0d9-5eb4de51a080
+## Status : 🔵 SUBMITTED
+
+## 1. Product Brief
+
+### Acceptance Criteria
+_(untyped ticket — no acceptance criteria)_
+
+## 2. Root cause & decisions
+
 # niwa-decision — hreflang alternates + localized crawler meta for FR (task 8b28ecd3)
 
 ROOT_CAUSE: UI i18n (3b8fb68c) and OG cards (28a49ed4) are localized, but crawlers
@@ -45,3 +59,31 @@ query-param preservation), `buildRobots`, `buildSitemap` (both locale URLs, name
 embed excluded). 24 pass. `tsc -b` clean.
 
 SCOPE: `web/middleware.ts`, `web/middleware.test.ts` only. API untouched.
+
+## 3. Files changed
+
+```
+.niwa-decision.md                                  |  70 ++++---
+ ...ang-alternates-localized-crawler-meta-for-fr.md |  89 +++++++++
+ web/middleware.test.ts                             |  82 +++++++-
+ web/middleware.ts                                  | 213 ++++++++++++++++++---
+ 4 files changed, 400 insertions(+), 54 deletions(-)
+```
+
+## 4. QA Log
+
+### Round 1 — ✅ APPROVED by review-8b28ecd3-a562-43b2-b0d9-5eb4de51a080 @ `cdf8a2f1f`
+clean — hreflang/canonical/og:locale both locales, embed excluded, dynamic robots+sitemap origin-derived, EN unchanged, 138 tests + build green
+- 🟢 AC1: buildI18nTags emits canonical(self)+hreflang en/fr/x-default+og:url on every isIndexable surface; /embed excluded; injected in middleware extraTags; tests assert both locales
+- 🟢 AC2: resolveMeta returns FR title/desc under ?lang=fr; EN DEFAULT_META/ROUTE_META strings byte-identical to pre-change; unknown lang falls back EN — covered by tests
+- 🟢 AC3: og:locale en_US/fr_FR via OG_LOCALE map in buildI18nTags alongside existing og tags; asserted in tests
+- 🟢 AC4: canonical = frUrl for fr, enUrl for en; en/fr alternates same path differ only by ?lang; never cross-locale; test 71-77 verifies
+- 🟢 AC5: dynamic /sitemap.xml with xhtml:link en/fr/x-default alternates, origin-derived; choice justified in .niwa-decision.md
+- 🟢 AC6: vitest 138 pass incl new middleware hreflang/meta/robots/sitemap both-locale tests; tsc clean; oxlint clean; vite build OK
+
+## 5. Timeline
+
+- round 1 → **approve** (review-8b28ecd3-a562-43b2-b0d9-5eb4de51a080)
+
+---
+_Auto-assembled by the niwa scribe from the Q&A gate. Task `8b28ecd3-a562-43b2-b0d9-5eb4de51a080`._

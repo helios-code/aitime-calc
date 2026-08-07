@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { buildOgImageUrl, resolveMeta } from './middleware'
+import { buildI18nTags, buildOgImageUrl, buildRobots, buildSitemap, resolveMeta } from './middleware'
 
 describe('resolveMeta', () => {
   it('returns the static entry for /methodology', () => {
@@ -31,6 +31,86 @@ describe('resolveMeta', () => {
 
   it('falls back to the default meta for an unknown path', () => {
     expect(resolveMeta('/nonsense', new URLSearchParams()).title).toBe('aitime-calc — human-equivalent time')
+  })
+
+  it('returns the FR static entry under ?lang=fr', () => {
+    expect(resolveMeta('/methodology', new URLSearchParams('lang=fr'))).toEqual({
+      title: 'Méthodologie — aitime-calc',
+      description: 'Comment le modèle ATEM convertit le temps calendaire en années de progrès humain équivalent.',
+    })
+  })
+
+  it('builds FR per-tool meta on home when ?lang=fr', () => {
+    const meta = resolveMeta('/', new URLSearchParams('tool=gpt-4o&lang=fr'))
+    expect(meta.title).toBe('gpt-4o vs. temps classique — aitime-calc')
+    expect(meta.description).toContain('gpt-4o')
+    expect(meta.description).toContain('progrès humain équivalent')
+  })
+
+  it('falls back to the FR default meta on home with only ?lang=fr', () => {
+    expect(resolveMeta('/', new URLSearchParams('lang=fr')).title).toBe('aitime-calc — temps humain équivalent')
+  })
+
+  it('treats an unknown lang as English (lang-free is canonical EN)', () => {
+    expect(resolveMeta('/methodology', new URLSearchParams('lang=de')).title).toBe('Methodology — aitime-calc')
+  })
+})
+
+describe('buildI18nTags', () => {
+  const ORIGIN = 'https://aitime-calc.example'
+
+  it('emits self-canonical + en/fr/x-default alternates for an EN page', () => {
+    const tags = buildI18nTags(ORIGIN, '/methodology', new URLSearchParams(), 'en')
+    expect(tags).toContain('<link rel="canonical" href="https://aitime-calc.example/methodology" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="en" href="https://aitime-calc.example/methodology" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="fr" href="https://aitime-calc.example/methodology?lang=fr" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="x-default" href="https://aitime-calc.example/methodology" />')
+    expect(tags).toContain('<meta property="og:locale" content="en_US" />')
+  })
+
+  it('canonicalizes a FR page to its own ?lang=fr URL, never across locales', () => {
+    const tags = buildI18nTags(ORIGIN, '/methodology', new URLSearchParams('lang=fr'), 'fr')
+    expect(tags).toContain('<link rel="canonical" href="https://aitime-calc.example/methodology?lang=fr" />')
+    expect(tags).toContain('<meta property="og:locale" content="fr_FR" />')
+    // x-default is the EN (lang-free) URL.
+    expect(tags).toContain('<link rel="alternate" hreflang="x-default" href="https://aitime-calc.example/methodology" />')
+  })
+
+  it('preserves non-lang query params in every alternate URL', () => {
+    const tags = buildI18nTags(ORIGIN, '/', new URLSearchParams('tool=gpt-4o&lang=fr'), 'fr')
+    // EN alternate keeps the tool but drops lang; FR alternate keeps both.
+    expect(tags).toContain('<link rel="alternate" hreflang="en" href="https://aitime-calc.example/?tool=gpt-4o" />')
+    expect(tags).toContain('<link rel="alternate" hreflang="fr" href="https://aitime-calc.example/?tool=gpt-4o&amp;lang=fr" />')
+  })
+})
+
+describe('buildRobots', () => {
+  it('allows crawling, disallows /embed, and points at the origin sitemap', () => {
+    const robots = buildRobots('https://aitime-calc.example')
+    expect(robots).toContain('User-agent: *')
+    expect(robots).toContain('Disallow: /embed')
+    expect(robots).toContain('Sitemap: https://aitime-calc.example/sitemap.xml')
+  })
+})
+
+describe('buildSitemap', () => {
+  const sitemap = buildSitemap('https://aitime-calc.example')
+
+  it('lists both locale URLs via xhtml:link alternates for each route', () => {
+    expect(sitemap).toContain('<loc>https://aitime-calc.example/methodology</loc>')
+    expect(sitemap).toContain('<xhtml:link rel="alternate" hreflang="en" href="https://aitime-calc.example/methodology" />')
+    expect(sitemap).toContain('<xhtml:link rel="alternate" hreflang="fr" href="https://aitime-calc.example/methodology?lang=fr" />')
+    expect(sitemap).toContain('<xhtml:link rel="alternate" hreflang="x-default" href="https://aitime-calc.example/methodology" />')
+  })
+
+  it('includes the home route and excludes /embed', () => {
+    expect(sitemap).toContain('<loc>https://aitime-calc.example/</loc>')
+    expect(sitemap).not.toContain('/embed')
+  })
+
+  it('declares the sitemaps + xhtml namespaces', () => {
+    expect(sitemap).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
+    expect(sitemap).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"')
   })
 })
 
