@@ -21,12 +21,12 @@ DECISION: Keep `lint` unchanged (works fine in any non-RTK contributor env) and 
 ## 3. Files changed
 
 ```
-.niwa-decision.md                                  | 45 +------------------
+.niwa-decision.md                                  | 31 +------------
  CONTRIBUTING.md                                    | 43 ++++++++++++++++--
  features/4cead7da-bac4-4364-a88b-dde5d9b66270.md   | 37 +++++++++++++++
  ...-lint-wrapper-document-contributor-gate-flow.md | 52 ++++++++++++++++++++++
  web/package.json                                   |  1 +
- 5 files changed, 131 insertions(+), 47 deletions(-)
+ 5 files changed, 131 insertions(+), 33 deletions(-)
 ```
 
 ## 4. QA Log
